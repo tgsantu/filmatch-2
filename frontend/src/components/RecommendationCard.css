@@ -1,0 +1,83 @@
+.rec-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.rec-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+.rec-card.expanded { border-color: var(--accent); transform: none; }
+
+.ai-badge {
+  position: absolute;
+  top: 0.4rem;
+  left: 0.4rem;
+  background: var(--accent);
+  color: #fff;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.card-reason {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.card-reason span {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.added-msg {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--green);
+  text-align: center;
+  padding: 0.3rem 0;
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.action-btn {
+  flex: 1;
+  padding: 0.45rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.action-btn:hover { background: var(--surface2); color: var(--text); }
+
+.streaming-section { display: flex; flex-direction: column; gap: 0.35rem; }
+.streaming-label { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+.streaming-loading, .streaming-none { font-size: 0.75rem; color: var(--text-muted); }
+.platform-list { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.platform-tag {
+  font-size: 0.7rem;
+  background: var(--blue);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-decoration: none;
+}
+.platform-tag:hover { opacity: 0.85; }
+.platform-type { opacity: 0.75; }
+.card-detail { padding: 0.75rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.6rem; }
+.card-overview { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }

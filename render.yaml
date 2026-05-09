@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: filmatch-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: TMDB_API_KEY
+        sync: false
+      - key: RAPIDAPI_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: PORT
+        value: 10000

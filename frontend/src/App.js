@@ -1,5 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useCallback } from 'react';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import {
+  collection, doc, setDoc, deleteDoc, updateDoc, onSnapshot, getDoc,
+} from 'firebase/firestore';
+import { auth, db } from './firebase';
+import Auth from './components/Auth';
 import Search from './components/Search';
 import Library from './components/Library';
 import Recommendations from './components/Recommendations';
@@ -16,19 +21,73 @@ const TABS = [
 ];
 
 export default function App() {
+  const [user, setUser] = useState(undefined); // undefined = loading
   const [tab, setTab] = useState('search');
   const [library, setLibrary] = useState([]);
+  const [settings, setSettings] = useState({ country: 'AR' });
 
-  const fetchLibrary = async () => {
-    try {
-      const res = await axios.get('/api/library');
-      setLibrary(res.data);
-    } catch {}
-  };
+  // Auth listener
+  useEffect(() => {
+    return onAuthStateChanged(auth, (u) => setUser(u || null));
+  }, []);
 
-  useEffect(() => { fetchLibrary(); }, []);
+  // Firestore library listener
+  useEffect(() => {
+    if (!user) { setLibrary([]); return; }
+    const ref = collection(db, 'users', user.uid, 'library');
+    return onSnapshot(ref, (snap) => {
+      setLibrary(snap.docs.map(d => d.data()).sort((a, b) => new Date(b.added_at) - new Date(a.added_at)));
+    });
+  }, [user]);
 
-  const handleLibraryUpdate = () => fetchLibrary();
+  // Load settings from Firestore
+  useEffect(() => {
+    if (!user) return;
+    getDoc(doc(db, 'users', user.uid, 'settings', 'main'))
+      .then(snap => { if (snap.exists()) setSettings(snap.data()); })
+      .catch(() => {});
+  }, [user]);
+
+  const addToLibrary = useCallback(async (movie, status) => {
+    if (!user) return;
+    await setDoc(doc(db, 'users', user.uid, 'library', String(movie.tmdb_id)), {
+      tmdb_id: movie.tmdb_id,
+      title: movie.title,
+      poster_path: movie.poster_path || null,
+      release_year: movie.release_year || null,
+      genres: movie.genres || [],
+      overview: movie.overview || '',
+      status,
+      added_at: new Date().toISOString(),
+    });
+  }, [user]);
+
+  const removeFromLibrary = useCallback(async (tmdbId) => {
+    if (!user) return;
+    await deleteDoc(doc(db, 'users', user.uid, 'library', String(tmdbId)));
+  }, [user]);
+
+  const updateLibraryStatus = useCallback(async (tmdbId, status) => {
+    if (!user) return;
+    await updateDoc(doc(db, 'users', user.uid, 'library', String(tmdbId)), { status });
+  }, [user]);
+
+  const saveSettings = useCallback(async (newSettings) => {
+    if (!user) return;
+    await setDoc(doc(db, 'users', user.uid, 'settings', 'main'), newSettings);
+    setSettings(newSettings);
+  }, [user]);
+
+  const getMovieStatus = useCallback((tmdbId) => {
+    const found = library.find(m => m.tmdb_id === tmdbId);
+    return found ? found.status : null;
+  }, [library]);
+
+  if (user === undefined) {
+    return <div className="loading" style={{ height: '100vh' }}><span className="spinner" /></div>;
+  }
+
+  if (!user) return <Auth />;
 
   return (
     <div className="app">
@@ -52,15 +111,35 @@ export default function App() {
               </button>
             ))}
           </nav>
+          <div className="user-menu">
+            <span className="user-email">{user.email || user.displayName}</span>
+            <button className="signout-btn" onClick={() => signOut(auth)}>Sign out</button>
+          </div>
         </div>
       </header>
 
       <main className="main">
-        {tab === 'search' && <Search library={library} onLibraryUpdate={handleLibraryUpdate} />}
-        {tab === 'library' && <Library library={library} onLibraryUpdate={handleLibraryUpdate} />}
-        {tab === 'recommendations' && <Recommendations />}
-        {tab === 'quiz' && <Quiz />}
-        {tab === 'settings' && <Settings />}
+        {tab === 'search' && (
+          <Search
+            library={library}
+            getMovieStatus={getMovieStatus}
+            onAdd={addToLibrary}
+            onRemove={removeFromLibrary}
+          />
+        )}
+        {tab === 'library' && (
+          <Library
+            library={library}
+            onRemove={removeFromLibrary}
+            onStatusChange={updateLibraryStatus}
+            country={settings.country}
+          />
+        )}
+        {tab === 'recommendations' && (
+          <Recommendations library={library} onAdd={addToLibrary} country={settings.country} />
+        )}
+        {tab === 'quiz' && <Quiz onAdd={addToLibrary} country={settings.country} />}
+        {tab === 'settings' && <Settings settings={settings} onSave={saveSettings} />}
       </main>
     </div>
   );

@@ -1,11 +1,9 @@
 const express = require('express');
 const axios = require('axios');
-const db = require('../database');
 const router = express.Router();
 
 router.get('/:tmdbId', async (req, res) => {
-  const settings = db.get('settings').value();
-  const country = (settings.country || 'AR').toLowerCase();
+  const country = (req.query.country || 'AR').toLowerCase();
 
   try {
     const response = await axios.get(`https://streaming-availability.p.rapidapi.com/shows/movie/${req.params.tmdbId}`, {

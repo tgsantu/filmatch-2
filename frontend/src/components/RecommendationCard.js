@@ -4,7 +4,7 @@ import './RecommendationCard.css';
 
 const PLACEHOLDER = 'https://via.placeholder.com/160x240/18181b/71717a?text=No+Poster';
 
-export default function RecommendationCard({ movie }) {
+export default function RecommendationCard({ movie, onAdd, country = 'AR' }) {
   const [streaming, setStreaming] = useState(null);
   const [loadingStream, setLoadingStream] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -14,7 +14,7 @@ export default function RecommendationCard({ movie }) {
     if (!expanded && movie.tmdb_id && !streaming) {
       setLoadingStream(true);
       try {
-        const res = await axios.get(`/api/streaming/${movie.tmdb_id}`);
+        const res = await axios.get(`/api/streaming/${movie.tmdb_id}?country=${country}`);
         setStreaming(res.data);
       } catch {
         setStreaming({ platforms: [] });
@@ -25,25 +25,15 @@ export default function RecommendationCard({ movie }) {
     setExpanded(e => !e);
   };
 
-  const addToLibrary = async (status) => {
+  const handleAdd = async (status) => {
     if (!movie.tmdb_id) return;
-    try {
-      await axios.post('/api/library', {
-        tmdb_id: movie.tmdb_id,
-        title: movie.title,
-        poster_path: movie.poster_path,
-        release_year: movie.year,
-        genres: [],
-        overview: movie.overview,
-        status,
-      });
-      setAdded(status);
-    } catch {}
+    await onAdd({ ...movie, release_year: movie.year }, status);
+    setAdded(status);
   };
 
   return (
     <div className={`rec-card ${expanded ? 'expanded' : ''}`}>
-      <div className="card-poster-wrap" onClick={toggle} style={{ cursor: 'pointer', position: 'relative', aspectRatio: '2/3', overflow: 'hidden', background: 'var(--surface2)' }}>
+      <div onClick={toggle} style={{ cursor: 'pointer', position: 'relative', aspectRatio: '2/3', overflow: 'hidden', background: 'var(--surface2)' }}>
         <img
           src={movie.poster_path || PLACEHOLDER}
           alt={movie.title}
@@ -61,9 +51,7 @@ export default function RecommendationCard({ movie }) {
       {expanded && (
         <div className="card-detail">
           {movie.overview && <p className="card-overview">{movie.overview}</p>}
-          {movie.reason && (
-            <p className="card-reason"><span>Why you'll love it:</span> {movie.reason}</p>
-          )}
+          {movie.reason && <p className="card-reason"><span>Why you'll love it:</span> {movie.reason}</p>}
 
           <div className="streaming-section">
             <p className="streaming-label">Where to watch</p>
@@ -82,13 +70,11 @@ export default function RecommendationCard({ movie }) {
 
           {!added ? (
             <div className="card-actions">
-              <button className="action-btn" onClick={() => addToLibrary('seen')}>Mark Seen</button>
-              <button className="action-btn" onClick={() => addToLibrary('want_to_watch')}>Watchlist</button>
+              <button className="action-btn" onClick={() => handleAdd('seen')}>Mark Seen</button>
+              <button className="action-btn" onClick={() => handleAdd('want_to_watch')}>Watchlist</button>
             </div>
           ) : (
-            <p className="added-msg">
-              {added === 'seen' ? '✓ Added to Seen' : '★ Added to Watchlist'}
-            </p>
+            <p className="added-msg">{added === 'seen' ? '✓ Added to Seen' : '★ Added to Watchlist'}</p>
           )}
         </div>
       )}

@@ -169,9 +169,42 @@
 .empty-state h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text); }
 .empty-state p { font-size: 0.875rem; }
 
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.user-email {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signout-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.7rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.signout-btn:hover { background: var(--surface2); color: var(--text); }
+
 @media (max-width: 640px) {
   .header-inner { flex-direction: column; height: auto; padding: 1rem 1rem 0.75rem; gap: 0.75rem; }
   .nav { justify-content: center; }
+  .user-menu { justify-content: center; }
+  .user-email { display: none; }
   .main { padding: 1.5rem 1rem; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }

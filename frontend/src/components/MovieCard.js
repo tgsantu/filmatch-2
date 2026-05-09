@@ -4,32 +4,22 @@ import './MovieCard.css';
 
 const PLACEHOLDER = 'https://via.placeholder.com/160x240/18181b/71717a?text=No+Poster';
 
-export default function MovieCard({ movie, libraryStatus, onLibraryUpdate, showStreaming = false }) {
-  const [status, setStatus] = useState(libraryStatus || null);
+export default function MovieCard({ movie, libraryStatus, onAdd, onRemove, country = 'AR', showStreaming = false }) {
   const [streaming, setStreaming] = useState(null);
   const [loadingStream, setLoadingStream] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
 
   const handleStatusChange = async (newStatus) => {
+    setActionLoading(true);
     try {
-      if (status === newStatus) {
-        await axios.delete(`/api/library/${movie.tmdb_id}`);
-        setStatus(null);
+      if (libraryStatus === newStatus) {
+        await onRemove(movie.tmdb_id);
       } else {
-        await axios.post('/api/library', {
-          tmdb_id: movie.tmdb_id,
-          title: movie.title,
-          poster_path: movie.poster_path,
-          release_year: movie.release_year,
-          genres: movie.genres,
-          overview: movie.overview,
-          status: newStatus,
-        });
-        setStatus(newStatus);
+        await onAdd(movie, newStatus);
       }
-      if (onLibraryUpdate) onLibraryUpdate();
-    } catch (err) {
-      console.error('Library update failed', err);
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -37,7 +27,7 @@ export default function MovieCard({ movie, libraryStatus, onLibraryUpdate, showS
     if (!movie.tmdb_id || streaming) return;
     setLoadingStream(true);
     try {
-      const res = await axios.get(`/api/streaming/${movie.tmdb_id}`);
+      const res = await axios.get(`/api/streaming/${movie.tmdb_id}?country=${country}`);
       setStreaming(res.data);
     } catch {
       setStreaming({ platforms: [] });
@@ -82,15 +72,12 @@ export default function MovieCard({ movie, libraryStatus, onLibraryUpdate, showS
       {expanded && (
         <div className="card-detail">
           {movie.overview && <p className="card-overview">{movie.overview}</p>}
-          {movie.reason && <p className="card-reason"><span>Why:</span> {movie.reason}</p>}
 
           {showStreaming && (
             <div className="streaming-section">
               <p className="streaming-label">Where to watch</p>
               {loadingStream && <p className="streaming-loading">Loading...</p>}
-              {streaming && streaming.platforms.length === 0 && (
-                <p className="streaming-none">Not available in your region</p>
-              )}
+              {streaming && streaming.platforms.length === 0 && <p className="streaming-none">Not available in your region</p>}
               {streaming && streaming.platforms.length > 0 && (
                 <div className="platform-list">
                   {streaming.platforms.map((p, i) => (
@@ -105,16 +92,18 @@ export default function MovieCard({ movie, libraryStatus, onLibraryUpdate, showS
 
           <div className="card-actions">
             <button
-              className={`action-btn ${status === 'seen' ? 'active-seen' : ''}`}
+              className={`action-btn ${libraryStatus === 'seen' ? 'active-seen' : ''}`}
               onClick={() => handleStatusChange('seen')}
+              disabled={actionLoading}
             >
-              {status === 'seen' ? '✓ Seen' : 'Mark Seen'}
+              {libraryStatus === 'seen' ? '✓ Seen' : 'Mark Seen'}
             </button>
             <button
-              className={`action-btn ${status === 'want_to_watch' ? 'active-want' : ''}`}
+              className={`action-btn ${libraryStatus === 'want_to_watch' ? 'active-want' : ''}`}
               onClick={() => handleStatusChange('want_to_watch')}
+              disabled={actionLoading}
             >
-              {status === 'want_to_watch' ? '★ Watchlist' : 'Watchlist'}
+              {libraryStatus === 'want_to_watch' ? '★ Watchlist' : 'Watchlist'}
             </button>
           </div>
         </div>

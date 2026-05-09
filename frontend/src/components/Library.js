@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import MovieCard from './MovieCard';
 import './Library.css';
+
+const PLACEHOLDER = 'https://via.placeholder.com/160x240/18181b/71717a?text=No+Poster';
 
 const FILTERS = [
   { value: 'all', label: 'All' },
@@ -9,29 +10,13 @@ const FILTERS = [
   { value: 'want_to_watch', label: 'Watchlist' },
 ];
 
-export default function Library({ library, onLibraryUpdate }) {
+export default function Library({ library, onRemove, onStatusChange, country }) {
   const [filter, setFilter] = useState('all');
-
   const filtered = filter === 'all' ? library : library.filter(m => m.status === filter);
-
-  const handleRemove = async (tmdbId) => {
-    try {
-      await axios.delete(`/api/library/${tmdbId}`);
-      onLibraryUpdate();
-    } catch {}
-  };
-
-  const handleStatusChange = async (tmdbId, newStatus) => {
-    try {
-      await axios.patch(`/api/library/${tmdbId}`, { status: newStatus });
-      onLibraryUpdate();
-    } catch {}
-  };
 
   return (
     <div>
       <h1 className="section-title">My Library</h1>
-
       <div className="filter-bar">
         {FILTERS.map(f => (
           <button
@@ -49,7 +34,7 @@ export default function Library({ library, onLibraryUpdate }) {
 
       {filtered.length === 0 && (
         <div className="empty-state">
-          <h3>{filter === 'all' ? 'Your library is empty' : `No ${filter === 'seen' ? 'seen' : 'watchlist'} movies yet`}</h3>
+          <h3>{filter === 'all' ? 'Your library is empty' : `No ${filter === 'seen' ? 'seen' : 'watchlist'} movies`}</h3>
           <p>Search for movies and add them to your library.</p>
         </div>
       )}
@@ -60,8 +45,9 @@ export default function Library({ library, onLibraryUpdate }) {
             <LibraryCard
               key={movie.tmdb_id}
               movie={movie}
-              onRemove={handleRemove}
-              onStatusChange={handleStatusChange}
+              onRemove={onRemove}
+              onStatusChange={onStatusChange}
+              country={country}
             />
           ))}
         </div>
@@ -70,19 +56,17 @@ export default function Library({ library, onLibraryUpdate }) {
   );
 }
 
-function LibraryCard({ movie, onRemove, onStatusChange }) {
+function LibraryCard({ movie, onRemove, onStatusChange, country }) {
   const [streaming, setStreaming] = useState(null);
   const [loadingStream, setLoadingStream] = useState(false);
   const [expanded, setExpanded] = useState(false);
-
   const genres = Array.isArray(movie.genres) ? movie.genres : [];
-  const PLACEHOLDER = 'https://via.placeholder.com/160x240/18181b/71717a?text=No+Poster';
 
   const fetchStreaming = async () => {
     if (streaming || !movie.tmdb_id) return;
     setLoadingStream(true);
     try {
-      const res = await axios.get(`/api/streaming/${movie.tmdb_id}`);
+      const res = await axios.get(`/api/streaming/${movie.tmdb_id}?country=${country || 'AR'}`);
       setStreaming(res.data);
     } catch {
       setStreaming({ platforms: [] });
@@ -102,14 +86,13 @@ function LibraryCard({ movie, onRemove, onStatusChange }) {
         <button
           className={`status-pill ${movie.status === 'seen' ? 'seen' : 'want'}`}
           onClick={() => onStatusChange(movie.tmdb_id, movie.status === 'seen' ? 'want_to_watch' : 'seen')}
-          title="Click to toggle status"
         >
           {movie.status === 'seen' ? '✓ Seen' : '★ Watchlist'}
         </button>
-        <button className="remove-btn" onClick={() => onRemove(movie.tmdb_id)} title="Remove from library">✕</button>
+        <button className="remove-btn" onClick={() => onRemove(movie.tmdb_id)}>✕</button>
       </div>
 
-      <div className="card-poster-wrap" onClick={toggle} style={{ cursor: 'pointer', position: 'relative', aspectRatio: '2/3', overflow: 'hidden', background: 'var(--surface2)' }}>
+      <div onClick={toggle} style={{ cursor: 'pointer', position: 'relative', aspectRatio: '2/3', overflow: 'hidden', background: 'var(--surface2)' }}>
         <img
           src={movie.poster_path || PLACEHOLDER}
           alt={movie.title}

@@ -3,10 +3,10 @@ import axios from 'axios';
 import RecommendationCard from './RecommendationCard';
 import './Quiz.css';
 
-export default function Quiz() {
+export default function Quiz({ onAdd, country }) {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
-  const [step, setStep] = useState('intro'); // intro | quiz | loading | results
+  const [step, setStep] = useState('intro');
   const [results, setResults] = useState([]);
   const [error, setError] = useState('');
   const [currentQ, setCurrentQ] = useState(0);
@@ -53,7 +53,7 @@ export default function Quiz() {
         <div className="quiz-intro">
           <div className="quiz-intro-icon">🎯</div>
           <h2>Find your perfect movie</h2>
-          <p>Answer {questions.length} quick questions and our AI will find movies tailored to your exact mood and taste right now.</p>
+          <p>Answer {questions.length} quick questions and our AI will find movies tailored to your mood.</p>
           <div className="quiz-features">
             <span>Mood</span><span>Genre</span><span>Decade</span><span>Themes</span><span>Language</span>
           </div>
@@ -84,23 +84,20 @@ export default function Quiz() {
           <h1 className="section-title">Your Picks</h1>
           <button className="btn btn-ghost" onClick={restart}>Take Again</button>
         </div>
-        <p className="section-subtitle">Based on your quiz answers, here are your personalized recommendations</p>
-        {results.length > 0 && (
-          <div className="grid">
-            {results.map((movie, i) => (
-              <RecommendationCard key={i} movie={movie} />
-            ))}
-          </div>
-        )}
+        <p className="section-subtitle">Based on your quiz answers</p>
+        <div className="grid">
+          {results.map((movie, i) => (
+            <RecommendationCard key={i} movie={movie} onAdd={onAdd} country={country} />
+          ))}
+        </div>
       </div>
     );
   }
 
-  // quiz step
   const q = questions[currentQ];
-  const progress = ((currentQ) / questions.length) * 100;
   const answered = Object.keys(answers).length;
   const allAnswered = answered === questions.length;
+  const progress = (currentQ / questions.length) * 100;
 
   return (
     <div>
@@ -138,28 +135,14 @@ export default function Quiz() {
       )}
 
       <div className="quiz-nav">
-        <button
-          className="btn btn-secondary"
-          onClick={() => setCurrentQ(q => Math.max(0, q - 1))}
-          disabled={currentQ === 0}
-        >
+        <button className="btn btn-secondary" onClick={() => setCurrentQ(q => Math.max(0, q - 1))} disabled={currentQ === 0}>
           ← Back
         </button>
         <div style={{ display: 'flex', gap: '0.5rem' }}>
           {currentQ < questions.length - 1 && (
-            <button
-              className="btn btn-ghost"
-              onClick={() => setCurrentQ(q => q + 1)}
-            >
-              Skip →
-            </button>
+            <button className="btn btn-ghost" onClick={() => setCurrentQ(q => q + 1)}>Skip →</button>
           )}
-          <button
-            className="btn btn-primary"
-            onClick={submit}
-            disabled={!allAnswered}
-            title={!allAnswered ? `Answer all ${questions.length} questions to submit` : ''}
-          >
+          <button className="btn btn-primary" onClick={submit} disabled={!allAnswered}>
             {allAnswered ? 'Get My Movies ✨' : `${answered}/${questions.length} answered`}
           </button>
         </div>

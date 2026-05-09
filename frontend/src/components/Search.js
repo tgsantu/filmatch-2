@@ -1,15 +1,14 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import axios from 'axios';
 import MovieCard from './MovieCard';
 import './Search.css';
 
-export default function Search({ library, onLibraryUpdate }) {
+export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searched, setSearched] = useState(false);
-  const inputRef = useRef();
 
   const search = useCallback(async () => {
     const q = query.trim();
@@ -28,14 +27,7 @@ export default function Search({ library, onLibraryUpdate }) {
     }
   }, [query]);
 
-  const handleKey = (e) => {
-    if (e.key === 'Enter') search();
-  };
-
-  const getMovieStatus = (tmdbId) => {
-    const found = library.find(m => m.tmdb_id === tmdbId);
-    return found ? found.status : null;
-  };
+  const handleKey = (e) => { if (e.key === 'Enter') search(); };
 
   return (
     <div>
@@ -43,7 +35,6 @@ export default function Search({ library, onLibraryUpdate }) {
 
       <div className="search-bar">
         <input
-          ref={inputRef}
           type="text"
           className="search-input"
           placeholder="Search for a movie..."
@@ -58,10 +49,7 @@ export default function Search({ library, onLibraryUpdate }) {
       </div>
 
       {error && <div className="error-msg">{error}</div>}
-
-      {loading && (
-        <div className="loading"><span className="spinner" /> Searching...</div>
-      )}
+      {loading && <div className="loading"><span className="spinner" /> Searching...</div>}
 
       {!loading && searched && results.length === 0 && !error && (
         <div className="empty-state">
@@ -79,7 +67,8 @@ export default function Search({ library, onLibraryUpdate }) {
                 key={movie.tmdb_id}
                 movie={movie}
                 libraryStatus={getMovieStatus(movie.tmdb_id)}
-                onLibraryUpdate={onLibraryUpdate}
+                onAdd={onAdd}
+                onRemove={onRemove}
                 showStreaming={true}
               />
             ))}

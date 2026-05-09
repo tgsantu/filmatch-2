@@ -7,14 +7,14 @@ const GROQ_BASE = 'https://api.groq.com/openai/v1/chat/completions';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 
 router.get('/', async (req, res) => {
-  const seenMovies = db.prepare("SELECT title, genres, release_year FROM library WHERE status = 'seen'").all();
+  const seenMovies = db.get('library').filter({ status: 'seen' }).value();
 
   if (seenMovies.length === 0) {
     return res.status(400).json({ error: 'Add some movies to your "Seen" list first to get recommendations.' });
   }
 
   const movieList = seenMovies.map(m => {
-    const genres = JSON.parse(m.genres || '[]');
+    const genres = Array.isArray(m.genres) ? m.genres : [];
     return `"${m.title}" (${m.release_year || 'N/A'}) - Genres: ${genres.join(', ') || 'Unknown'}`;
   }).join('\n');
 
@@ -41,7 +41,7 @@ router.get('/', async (req, res) => {
     const enriched = await Promise.all(recs.map(async rec => {
       try {
         const search = await axios.get(`${TMDB_BASE}/search/movie`, {
-          params: { api_key: process.env.TMDB_API_KEY, query: rec.title, year: rec.year, language: 'en-US' },
+          params: { api_key: process.env.TMDB_API_KEY, query: rec.title, language: 'en-US' },
         });
         const movie = search.data.results[0];
         if (!movie) return { ...rec, poster_path: null, tmdb_id: null, overview: '' };

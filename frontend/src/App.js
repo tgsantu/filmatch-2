@@ -5,6 +5,7 @@ import {
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
 import Auth from './components/Auth';
+import Onboarding from './components/Onboarding';
 import Search from './components/Search';
 import Library from './components/Library';
 import Recommendations from './components/Recommendations';
@@ -78,6 +79,13 @@ export default function App() {
     setSettings(newSettings);
   }, [user]);
 
+  const completeOnboarding = useCallback(async () => {
+    if (!user) return;
+    const updated = { ...settings, onboardingDone: true };
+    await setDoc(doc(db, 'users', user.uid, 'settings', 'main'), updated);
+    setSettings(updated);
+  }, [user, settings]);
+
   const getMovieStatus = useCallback((tmdbId) => {
     const found = library.find(m => m.tmdb_id === tmdbId);
     return found ? found.status : null;
@@ -91,6 +99,9 @@ export default function App() {
 
   return (
     <div className="app">
+      {user && !settings.onboardingDone && (
+        <Onboarding onDone={completeOnboarding} />
+      )}
       <header className="header">
         <div className="header-inner">
           <div className="logo">

@@ -4,3 +4,5 @@ backend/filmatch.json
 backend/*.log
 frontend/build/
 .DS_Store
+frontend_err.log
+frontend_start.log

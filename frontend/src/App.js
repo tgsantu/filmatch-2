@@ -26,6 +26,7 @@ export default function App() {
   const [tab, setTab] = useState('search');
   const [library, setLibrary] = useState([]);
   const [settings, setSettings] = useState({ country: 'AR' });
+  const [settingsLoaded, setSettingsLoaded] = useState(false);
 
   // Auth listener
   useEffect(() => {
@@ -43,10 +44,11 @@ export default function App() {
 
   // Load settings from Firestore
   useEffect(() => {
-    if (!user) return;
+    if (!user) { setSettingsLoaded(false); return; }
     getDoc(doc(db, 'users', user.uid, 'settings', 'main'))
       .then(snap => { if (snap.exists()) setSettings(snap.data()); })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setSettingsLoaded(true));
   }, [user]);
 
   const addToLibrary = useCallback(async (movie, status) => {
@@ -99,7 +101,7 @@ export default function App() {
 
   return (
     <div className="app">
-      {user && !settings.onboardingDone && (
+      {settingsLoaded && !settings.onboardingDone && (
         <Onboarding onDone={completeOnboarding} />
       )}
       <header className="header">

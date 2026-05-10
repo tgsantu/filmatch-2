@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useLanguage } from '../LanguageContext';
 import './MovieCard.css';
 
 const PLACEHOLDER = 'https://via.placeholder.com/160x240/18181b/71717a?text=No+Poster';
 
 export default function MovieCard({ movie, libraryStatus, onAdd, onRemove, country = 'AR', showStreaming = false }) {
+  const { t } = useLanguage();
   const [streaming, setStreaming] = useState(null);
   const [loadingStream, setLoadingStream] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -54,7 +56,7 @@ export default function MovieCard({ movie, libraryStatus, onAdd, onRemove, count
           onError={e => { e.target.src = PLACEHOLDER; }}
         />
         <div className="card-overlay">
-          <span className="card-expand-hint">{expanded ? 'Less' : 'More'}</span>
+          <span className="card-expand-hint">{expanded ? t.card.less : t.card.more}</span>
         </div>
       </div>
 
@@ -77,7 +79,7 @@ export default function MovieCard({ movie, libraryStatus, onAdd, onRemove, count
               <p className={`card-overview ${showFullOverview ? 'full' : ''}`}>{movie.overview}</p>
               {movie.overview.length > 150 && (
                 <button className="read-more-btn" onClick={() => setShowFullOverview(v => !v)}>
-                  {showFullOverview ? 'Read less' : 'Read more'}
+                  {showFullOverview ? t.card.readLess : t.card.readMore}
                 </button>
               )}
             </div>
@@ -85,9 +87,9 @@ export default function MovieCard({ movie, libraryStatus, onAdd, onRemove, count
 
           {showStreaming && (
             <div className="streaming-section">
-              <p className="streaming-label">Where to watch</p>
-              {loadingStream && <p className="streaming-loading">Loading...</p>}
-              {streaming && streaming.platforms.length === 0 && <p className="streaming-none">Not available in your region</p>}
+              <p className="streaming-label">{t.card.whereToWatch}</p>
+              {loadingStream && <p className="streaming-loading">{t.card.loadingStream}</p>}
+              {streaming && streaming.platforms.length === 0 && <p className="streaming-none">{t.card.noStreaming}</p>}
               {streaming && streaming.platforms.length > 0 && (
                 <div className="platform-list">
                   {streaming.platforms.map((p, i) => (
@@ -106,14 +108,14 @@ export default function MovieCard({ movie, libraryStatus, onAdd, onRemove, count
               onClick={() => handleStatusChange('seen')}
               disabled={actionLoading}
             >
-              {libraryStatus === 'seen' ? '✓ Seen' : 'Mark Seen'}
+              {libraryStatus === 'seen' ? t.card.seen : t.card.markSeen}
             </button>
             <button
               className={`action-btn ${libraryStatus === 'want_to_watch' ? 'active-want' : ''}`}
               onClick={() => handleStatusChange('want_to_watch')}
               disabled={actionLoading}
             >
-              {libraryStatus === 'want_to_watch' ? '★ Watchlist' : 'Watchlist'}
+              {libraryStatus === 'want_to_watch' ? t.card.watchlist : t.card.addWatchlist}
             </button>
           </div>
         </div>

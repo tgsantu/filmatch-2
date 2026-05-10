@@ -4,53 +4,60 @@ const router = express.Router();
 
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 
-let genreMap = {};
-let genreMapLoaded = false;
+const genreMaps = {};
 
-async function loadGenres() {
-  if (genreMapLoaded) return;
+async function loadGenres(tmdbLang) {
+  if (genreMaps[tmdbLang]) return;
+  genreMaps[tmdbLang] = {};
   try {
     const res = await axios.get(`${TMDB_BASE}/genre/movie/list`, {
-      params: { api_key: process.env.TMDB_API_KEY, language: 'en-US' },
+      params: { api_key: process.env.TMDB_API_KEY, language: tmdbLang },
     });
-    res.data.genres.forEach(g => { genreMap[g.id] = g.name; });
-    genreMapLoaded = true;
+    res.data.genres.forEach(g => { genreMaps[tmdbLang][g.id] = g.name; });
   } catch {}
 }
 
+function toTmdbLang(lang) {
+  return lang === 'es' ? 'es-ES' : 'en-US';
+}
+
 router.get('/search', async (req, res) => {
-  const { query } = req.query;
+  const { query, lang = 'en' } = req.query;
   if (!query) return res.status(400).json({ error: 'Query parameter required' });
+  const tmdbLang = toTmdbLang(lang);
 
   try {
-    await loadGenres();
+    await loadGenres(tmdbLang);
     const response = await axios.get(`${TMDB_BASE}/search/movie`, {
-      params: { api_key: process.env.TMDB_API_KEY, query, language: 'en-US', page: 1 },
+      params: { api_key: process.env.TMDB_API_KEY, query, language: tmdbLang, page: 1 },
     });
-    res.json(response.data.results.map(m => formatMovie(m)));
+    res.json(response.data.results.map(m => formatMovie(m, genreMaps[tmdbLang])));
   } catch (err) {
     res.status(502).json({ error: 'Failed to fetch from TMDB', detail: err.message });
   }
 });
 
 router.get('/:tmdbId', async (req, res) => {
+  const { lang = 'en' } = req.query;
+  const tmdbLang = toTmdbLang(lang);
+
   try {
-    await loadGenres();
+    await loadGenres(tmdbLang);
     const response = await axios.get(`${TMDB_BASE}/movie/${req.params.tmdbId}`, {
-      params: { api_key: process.env.TMDB_API_KEY, language: 'en-US' },
+      params: { api_key: process.env.TMDB_API_KEY, language: tmdbLang },
     });
-    res.json(formatMovie(response.data));
+    res.json(formatMovie(response.data, genreMaps[tmdbLang]));
   } catch (err) {
     res.status(502).json({ error: 'Failed to fetch movie details', detail: err.message });
   }
 });
 
-function formatMovie(m) {
+function formatMovie(m, map = {}) {
   let genres = [];
   if (m.genres && Array.isArray(m.genres)) {
-    genres = m.genres.map(g => (typeof g === 'object' ? g.name : genreMap[g] || String(g)));
+    genres = m.genres.map(g => (typeof g === 'object' ? g.name : map[g] || String(g)));
   } else if (m.genre_ids && Array.isArray(m.genre_ids)) {
-    genres = m.genre_ids.map(id => genreMap[id] || String(id));
+    genres = m.genre_ids.map(id => map[id] || String(id));
   }
   return {
     tmdb_id: m.id,

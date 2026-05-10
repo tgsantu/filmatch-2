@@ -1,24 +1,32 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useLanguage } from '../LanguageContext';
 import './Library.css';
 
 const PLACEHOLDER = 'https://via.placeholder.com/160x240/18181b/71717a?text=No+Poster';
 
-const FILTERS = [
-  { value: 'all', label: 'All' },
-  { value: 'seen', label: 'Seen' },
-  { value: 'want_to_watch', label: 'Watchlist' },
-];
-
 export default function Library({ library, onRemove, onStatusChange, country }) {
+  const { t } = useLanguage();
   const [filter, setFilter] = useState('all');
   const filtered = filter === 'all' ? library : library.filter(m => m.status === filter);
 
+  const filters = [
+    { value: 'all', label: t.library.all },
+    { value: 'seen', label: t.library.seen },
+    { value: 'want_to_watch', label: t.library.watchlist },
+  ];
+
+  const emptyMsg = filter === 'all'
+    ? t.library.emptyAll
+    : filter === 'seen'
+    ? t.library.emptySeen
+    : t.library.emptyWatchlist;
+
   return (
     <div>
-      <h1 className="section-title">My Library</h1>
+      <h1 className="section-title">{t.library.title}</h1>
       <div className="filter-bar">
-        {FILTERS.map(f => (
+        {filters.map(f => (
           <button
             key={f.value}
             className={`filter-btn ${filter === f.value ? 'active' : ''}`}
@@ -34,8 +42,8 @@ export default function Library({ library, onRemove, onStatusChange, country }) 
 
       {filtered.length === 0 && (
         <div className="empty-state">
-          <h3>{filter === 'all' ? 'Your library is empty' : `No ${filter === 'seen' ? 'seen' : 'watchlist'} movies`}</h3>
-          <p>Search for movies and add them to your library.</p>
+          <h3>{emptyMsg}</h3>
+          <p>{t.library.emptyDesc}</p>
         </div>
       )}
 
@@ -57,6 +65,7 @@ export default function Library({ library, onRemove, onStatusChange, country }) 
 }
 
 function LibraryCard({ movie, onRemove, onStatusChange, country }) {
+  const { t } = useLanguage();
   const [streaming, setStreaming] = useState(null);
   const [loadingStream, setLoadingStream] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -88,7 +97,7 @@ function LibraryCard({ movie, onRemove, onStatusChange, country }) {
           className={`status-pill ${movie.status === 'seen' ? 'seen' : 'want'}`}
           onClick={() => onStatusChange(movie.tmdb_id, movie.status === 'seen' ? 'want_to_watch' : 'seen')}
         >
-          {movie.status === 'seen' ? '✓ Seen' : '★ Watchlist'}
+          {movie.status === 'seen' ? t.library.statusSeen : t.library.statusWatchlist}
         </button>
         <button className="remove-btn" onClick={() => onRemove(movie.tmdb_id)}>✕</button>
       </div>
@@ -121,15 +130,15 @@ function LibraryCard({ movie, onRemove, onStatusChange, country }) {
               <p className={`card-overview ${showFullOverview ? 'full' : ''}`}>{movie.overview}</p>
               {movie.overview.length > 150 && (
                 <button className="read-more-btn" onClick={() => setShowFullOverview(v => !v)}>
-                  {showFullOverview ? 'Read less' : 'Read more'}
+                  {showFullOverview ? t.library.readLess : t.library.readMore}
                 </button>
               )}
             </div>
           )}
           <div className="streaming-section">
-            <p className="streaming-label">Where to watch</p>
-            {loadingStream && <p className="streaming-loading">Loading...</p>}
-            {streaming && streaming.platforms.length === 0 && <p className="streaming-none">Not available in your region</p>}
+            <p className="streaming-label">{t.library.whereToWatch}</p>
+            {loadingStream && <p className="streaming-loading">{t.library.loadingStream}</p>}
+            {streaming && streaming.platforms.length === 0 && <p className="streaming-none">{t.library.noStreaming}</p>}
             {streaming && streaming.platforms.length > 0 && (
               <div className="platform-list">
                 {streaming.platforms.map((p, i) => (

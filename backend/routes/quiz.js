@@ -6,23 +6,45 @@ const router = express.Router();
 const GROQ_BASE = 'https://api.groq.com/openai/v1/chat/completions';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 
-const SEED_QUESTIONS = [
-  {
-    question: "What's your mood right now?",
-    options: ['I want to laugh', 'I need something intense', 'I want to be scared', 'I want to feel inspired'],
-  },
-  {
-    question: 'Which genre are you feeling tonight?',
-    options: ['Action / Thriller', 'Drama / Romance', 'Sci-Fi / Fantasy', 'Horror / Mystery'],
-  },
-];
+const SEED_QUESTIONS = {
+  es: [
+    {
+      question: '¿Cuál es tu estado de ánimo ahora mismo?',
+      options: ['Quiero reír', 'Necesito algo intenso', 'Quiero pasar miedo', 'Quiero inspirarme'],
+    },
+    {
+      question: '¿Qué género te está pidiendo el cuerpo esta noche?',
+      options: ['Acción / Thriller', 'Drama / Romance', 'Ciencia Ficción / Fantasía', 'Terror / Misterio'],
+    },
+  ],
+  en: [
+    {
+      question: "What's your mood right now?",
+      options: ['I want to laugh', 'I need something intense', 'I want to be scared', 'I want to feel inspired'],
+    },
+    {
+      question: 'Which genre are you feeling tonight?',
+      options: ['Action / Thriller', 'Drama / Romance', 'Sci-Fi / Fantasy', 'Horror / Mystery'],
+    },
+  ],
+};
+
+function toTmdbLang(lang) {
+  return lang === 'es' ? 'es-ES' : 'en-US';
+}
 
 router.get('/seed', (req, res) => {
-  res.json(SEED_QUESTIONS);
+  const lang = req.query.lang || 'en';
+  res.json(SEED_QUESTIONS[lang] || SEED_QUESTIONS.en);
 });
 
 router.post('/next', async (req, res) => {
-  const { history = [] } = req.body;
+  const { history = [], lang = 'en' } = req.body;
+  const tmdbLang = toTmdbLang(lang);
+
+  const langInstruction = lang === 'es'
+    ? 'Generate questions and options in Spanish. Write the "reason" field in Spanish.'
+    : 'Generate questions and options in English. Write the "reason" field in English.';
 
   const historyText = history
     .map((h, i) => `Q${i + 1}: ${h.question}\nA: ${h.answer}`)
@@ -37,6 +59,7 @@ Rules:
 - Questions should drill progressively deeper into the user's specific taste
 - Never repeat a topic already covered in the conversation
 - After 5–7 questions when you have enough context, switch to recommendations
+- ${langInstruction}
 
 Conversation so far:
 ${historyText || 'No answers yet.'}
@@ -78,7 +101,7 @@ Format 2 — final recommendations (exactly 6 movies):
       const enriched = await Promise.all(parsed.recommendations.slice(0, 6).map(async rec => {
         try {
           const search = await axios.get(`${TMDB_BASE}/search/movie`, {
-            params: { api_key: process.env.TMDB_API_KEY, query: rec.title, language: 'en-US' },
+            params: { api_key: process.env.TMDB_API_KEY, query: rec.title, language: tmdbLang },
           });
           const movie = search.data.results[0];
           if (!movie) return { ...rec, poster_path: null, tmdb_id: null, overview: '' };

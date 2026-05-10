@@ -12,6 +12,10 @@ const GENRE_MAP = {
   10770: 'TV Movie', 53: 'Thriller', 10752: 'War', 37: 'Western',
 };
 
+function toTmdbLang(lang) {
+  return lang === 'es' ? 'es-ES' : 'en-US';
+}
+
 function formatMovie(m) {
   return {
     tmdb_id: m.id,
@@ -27,6 +31,9 @@ function formatMovie(m) {
 
 router.get('/trending', async (req, res) => {
   const country = (req.query.country || 'us').toLowerCase();
+  const lang = req.query.lang || 'en';
+  const outputLang = lang === 'es' ? 'es' : 'en';
+
   try {
     const r = await axios.get('https://streaming-availability.p.rapidapi.com/shows/search/filters', {
       headers: {
@@ -37,7 +44,7 @@ router.get('/trending', async (req, res) => {
         country,
         show_type: 'movie',
         order_by: 'popularity_1year',
-        output_language: 'en',
+        output_language: outputLang,
       },
     });
 
@@ -60,9 +67,12 @@ router.get('/trending', async (req, res) => {
 });
 
 router.get('/similar/:tmdbId', async (req, res) => {
+  const lang = req.query.lang || 'en';
+  const tmdbLang = toTmdbLang(lang);
+
   try {
     const r = await axios.get(`${TMDB_BASE}/movie/${req.params.tmdbId}/recommendations`, {
-      params: { api_key: process.env.TMDB_API_KEY, language: 'en-US' },
+      params: { api_key: process.env.TMDB_API_KEY, language: tmdbLang },
     });
     res.json(r.data.results.slice(0, 20).map(formatMovie));
   } catch {

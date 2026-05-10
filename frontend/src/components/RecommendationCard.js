@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useLanguage } from '../LanguageContext';
 import './RecommendationCard.css';
 
 const PLACEHOLDER = 'https://via.placeholder.com/160x240/18181b/71717a?text=No+Poster';
 
 export default function RecommendationCard({ movie, onAdd, country = 'AR' }) {
+  const { t } = useLanguage();
   const [streaming, setStreaming] = useState(null);
   const [loadingStream, setLoadingStream] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -41,7 +43,7 @@ export default function RecommendationCard({ movie, onAdd, country = 'AR' }) {
           style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           onError={e => { e.target.src = PLACEHOLDER; }}
         />
-        <div className="ai-badge">AI Pick</div>
+        <div className="ai-badge">{t.recCard.aiPick}</div>
       </div>
 
       <div className="card-info">
@@ -56,17 +58,17 @@ export default function RecommendationCard({ movie, onAdd, country = 'AR' }) {
               <p className={`card-overview ${showFullOverview ? 'full' : ''}`}>{movie.overview}</p>
               {movie.overview.length > 150 && (
                 <button className="read-more-btn" onClick={() => setShowFullOverview(v => !v)}>
-                  {showFullOverview ? 'Read less' : 'Read more'}
+                  {showFullOverview ? t.recCard.readLess : t.recCard.readMore}
                 </button>
               )}
             </div>
           )}
-          {movie.reason && <p className="card-reason"><span>Why you'll love it:</span> {movie.reason}</p>}
+          {movie.reason && <p className="card-reason"><span>{t.recCard.whyYoullLove}</span> {movie.reason}</p>}
 
           <div className="streaming-section">
-            <p className="streaming-label">Where to watch</p>
-            {loadingStream && <p className="streaming-loading">Loading...</p>}
-            {streaming && streaming.platforms.length === 0 && <p className="streaming-none">Not available in your region</p>}
+            <p className="streaming-label">{t.recCard.whereToWatch}</p>
+            {loadingStream && <p className="streaming-loading">{t.recCard.loadingStream}</p>}
+            {streaming && streaming.platforms.length === 0 && <p className="streaming-none">{t.recCard.noStreaming}</p>}
             {streaming && streaming.platforms.length > 0 && (
               <div className="platform-list">
                 {streaming.platforms.map((p, i) => (
@@ -80,11 +82,11 @@ export default function RecommendationCard({ movie, onAdd, country = 'AR' }) {
 
           {!added ? (
             <div className="card-actions">
-              <button className="action-btn" onClick={() => handleAdd('seen')}>Mark Seen</button>
-              <button className="action-btn" onClick={() => handleAdd('want_to_watch')}>Watchlist</button>
+              <button className="action-btn" onClick={() => handleAdd('seen')}>{t.recCard.markSeen}</button>
+              <button className="action-btn" onClick={() => handleAdd('want_to_watch')}>{t.recCard.addWatchlist}</button>
             </div>
           ) : (
-            <p className="added-msg">{added === 'seen' ? '✓ Added to Seen' : '★ Added to Watchlist'}</p>
+            <p className="added-msg">{added === 'seen' ? t.recCard.addedSeen : t.recCard.addedWatchlist}</p>
           )}
         </div>
       )}

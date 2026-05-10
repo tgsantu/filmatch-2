@@ -19,6 +19,43 @@
   gap: 1rem;
 }
 
+.auth-lang {
+  display: flex;
+  justify-content: flex-end;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  width: fit-content;
+  align-self: flex-end;
+}
+
+.auth-lang button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.55rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.03em;
+}
+
+.auth-lang button:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.auth-lang button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.auth-lang button:not(.active):hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
 .auth-logo {
   display: flex;
   align-items: center;

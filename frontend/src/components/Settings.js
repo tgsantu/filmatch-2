@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLanguage } from '../LanguageContext';
 import './Settings.css';
 
 const COUNTRIES = [
@@ -17,6 +18,7 @@ const COUNTRIES = [
 ];
 
 export default function Settings({ settings, onSave }) {
+  const { t } = useLanguage();
   const [country, setCountry] = useState(settings?.country || 'AR');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -32,13 +34,13 @@ export default function Settings({ settings, onSave }) {
 
   return (
     <div>
-      <h1 className="section-title">Settings</h1>
+      <h1 className="section-title">{t.settings.title}</h1>
 
       <div className="settings-card">
-        <h2 className="settings-section-title">Streaming Region</h2>
-        <p className="settings-desc">Select your country to get accurate streaming availability.</p>
+        <h2 className="settings-section-title">{t.settings.streamingRegion}</h2>
+        <p className="settings-desc">{t.settings.selectCountry}</p>
         <div className="setting-row">
-          <label className="setting-label">Country</label>
+          <label className="setting-label">{t.settings.country}</label>
           <select
             className="setting-select"
             value={country}
@@ -50,16 +52,16 @@ export default function Settings({ settings, onSave }) {
           </select>
         </div>
         <button className="btn btn-primary" onClick={save} disabled={saving}>
-          {saving ? 'Saving...' : saved ? '✓ Saved!' : 'Save Settings'}
+          {saving ? t.settings.saving : saved ? t.settings.saved : t.settings.save}
         </button>
       </div>
 
       <div className="settings-card settings-info">
-        <h2 className="settings-section-title">About theFilMatch</h2>
+        <h2 className="settings-section-title">{t.settings.about}</h2>
         <div className="info-grid">
-          <div className="info-item"><span className="info-icon"><img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg" alt="TMDB" className="tmdb-logo" /></span><div><p className="info-title">TMDB</p><p className="info-desc">Movie data, posters & metadata</p></div></div>
-          <div className="info-item"><span className="info-icon">📺</span><div><p className="info-title">Movie of the Night API</p><p className="info-desc">Real-time streaming platform data</p></div></div>
-          <div className="info-item"><span className="info-icon">💤</span><div><p className="info-title">Free hosting</p><p className="info-desc">To keep this app free, the server sleeps when idle. AI features may take up to 30 s on first use — just wait a moment!</p></div></div>
+          <div className="info-item"><span className="info-icon"><img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg" alt="TMDB" className="tmdb-logo" /></span><div><p className="info-title">TMDB</p><p className="info-desc">{t.settings.tmdbDesc}</p></div></div>
+          <div className="info-item"><span className="info-icon">📺</span><div><p className="info-title">Movie of the Night API</p><p className="info-desc">{t.settings.movieOfNightDesc}</p></div></div>
+          <div className="info-item"><span className="info-icon">💤</span><div><p className="info-title">{t.settings.freeHosting}</p><p className="info-desc">{t.settings.freeHostingDesc}</p></div></div>
         </div>
       </div>
     </div>

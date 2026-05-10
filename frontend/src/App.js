@@ -4,6 +4,7 @@ import {
   collection, doc, setDoc, deleteDoc, updateDoc, onSnapshot, getDoc,
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
+import { useLanguage } from './LanguageContext';
 import Auth from './components/Auth';
 import Onboarding from './components/Onboarding';
 import Search from './components/Search';
@@ -13,15 +14,8 @@ import Quiz from './components/Quiz';
 import Settings from './components/Settings';
 import './App.css';
 
-const TABS = [
-  { id: 'search', label: 'Home' },
-  { id: 'library', label: 'Library' },
-  { id: 'recommendations', label: 'For You' },
-  { id: 'quiz', label: 'Discover' },
-  { id: 'settings', label: 'Settings' },
-];
-
 export default function App() {
+  const { lang, setLang, t } = useLanguage();
   const [user, setUser] = useState(undefined); // undefined = loading
   const [tab, setTab] = useState('search');
   const [library, setLibrary] = useState([]);
@@ -34,14 +28,12 @@ export default function App() {
     localStorage.setItem('filmatch-theme', theme);
   }, [theme]);
 
-  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
+  const toggleTheme = () => setTheme(t2 => t2 === 'dark' ? 'light' : 'dark');
 
-  // Auth listener
   useEffect(() => {
     return onAuthStateChanged(auth, (u) => setUser(u || null));
   }, []);
 
-  // Firestore library listener
   useEffect(() => {
     if (!user) { setLibrary([]); return; }
     const ref = collection(db, 'users', user.uid, 'library');
@@ -50,7 +42,6 @@ export default function App() {
     });
   }, [user]);
 
-  // Load settings from Firestore
   useEffect(() => {
     if (!user) { setSettingsLoaded(false); return; }
     getDoc(doc(db, 'users', user.uid, 'settings', 'main'))
@@ -101,6 +92,14 @@ export default function App() {
     return found ? found.status : null;
   }, [library]);
 
+  const tabs = [
+    { id: 'search', label: t.tabs.home },
+    { id: 'library', label: t.tabs.library },
+    { id: 'recommendations', label: t.tabs.recommendations },
+    { id: 'quiz', label: t.tabs.discover },
+    { id: 'settings', label: t.tabs.settings },
+  ];
+
   if (user === undefined) {
     return <div className="loading" style={{ height: '100vh' }}><span className="spinner" /></div>;
   }
@@ -119,22 +118,26 @@ export default function App() {
             <span className="logo-text">theFilMatch</span>
           </div>
           <nav className="nav">
-            {TABS.map(t => (
+            {tabs.map(tab2 => (
               <button
-                key={t.id}
-                className={`nav-btn ${tab === t.id ? 'active' : ''}`}
-                onClick={() => setTab(t.id)}
+                key={tab2.id}
+                className={`nav-btn ${tab === tab2.id ? 'active' : ''}`}
+                onClick={() => setTab(tab2.id)}
               >
-                {t.label}
+                {tab2.label}
               </button>
             ))}
           </nav>
           <div className="user-menu">
+            <div className="lang-toggle">
+              <button className={lang === 'es' ? 'active' : ''} onClick={() => setLang('es')}>ES</button>
+              <button className={lang === 'en' ? 'active' : ''} onClick={() => setLang('en')}>EN</button>
+            </div>
             <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
               {theme === 'dark' ? '☀' : '☾'}
             </button>
             <span className="user-email">{user.email || user.displayName}</span>
-            <button className="signout-btn" onClick={() => signOut(auth)}>Sign out</button>
+            <button className="signout-btn" onClick={() => signOut(auth)}>{t.common.signOut}</button>
           </div>
         </div>
       </header>
@@ -170,16 +173,13 @@ export default function App() {
       </footer>
 
       <nav className="bottom-nav">
-        {TABS.map(t => (
+        {tabs.map(tab2 => (
           <button
-            key={t.id}
-            className={`nav-btn ${tab === t.id ? 'active' : ''}`}
-            onClick={() => setTab(t.id)}
+            key={tab2.id}
+            className={`nav-btn ${tab === tab2.id ? 'active' : ''}`}
+            onClick={() => setTab(tab2.id)}
           >
-            {t.label}
-            {t.id === 'library' && library.length > 0 && (
-              <span className="badge">{library.length}</span>
-            )}
+            {tab2.label}
           </button>
         ))}
       </nav>

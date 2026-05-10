@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import MovieCard from './MovieCard';
+import { useLanguage } from '../LanguageContext';
 import './Search.css';
 
 export default function Search({ library, getMovieStatus, onAdd, onRemove, country }) {
+  const { lang, t } = useLanguage();
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -19,16 +21,14 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove, count
   const fetchTrending = () => {
     setTrendingLoading(true);
     setTrendingError(false);
-    axios.get('/api/home/trending', { params: { country } })
+    axios.get('/api/home/trending', { params: { country, lang } })
       .then(r => setTrending(r.data))
       .catch(() => setTrendingError(true))
       .finally(() => setTrendingLoading(false));
   };
 
-  // Fetch trending on mount and when country changes
-  useEffect(() => { fetchTrending(); }, [country]); // eslint-disable-line
+  useEffect(() => { fetchTrending(); }, [country, lang]); // eslint-disable-line
 
-  // Fetch "because you watched" when seen list changes
   const seenKey = library
     .filter(m => m.status === 'seen' && m.tmdb_id)
     .slice(0, 2)
@@ -42,12 +42,12 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove, count
     if (picks.length === 0) { setRelated([]); return; }
     Promise.all(
       picks.map(m =>
-        axios.get(`/api/home/similar/${m.tmdb_id}`)
+        axios.get(`/api/home/similar/${m.tmdb_id}`, { params: { lang } })
           .then(r => ({ baseTitle: m.title, movies: r.data }))
           .catch(() => null)
       )
     ).then(sections => setRelated(sections.filter(Boolean)));
-  }, [seenKey]); // seenKey is a stable primitive derived from library
+  }, [seenKey, lang]); // eslint-disable-line
 
   const search = useCallback(async () => {
     const q = query.trim();
@@ -56,7 +56,7 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove, count
     setSearchError('');
     setSearched(true);
     try {
-      const res = await axios.get('/api/movies/search', { params: { query: q } });
+      const res = await axios.get('/api/movies/search', { params: { query: q, lang } });
       setResults(res.data);
     } catch (err) {
       setSearchError(err.response?.data?.error || 'Search failed. Please try again.');
@@ -64,7 +64,7 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove, count
     } finally {
       setSearchLoading(false);
     }
-  }, [query]);
+  }, [query, lang]);
 
   const clearSearch = () => {
     setQuery('');
@@ -83,33 +83,32 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove, count
         <input
           type="text"
           className="search-input"
-          placeholder="Search for a movie..."
+          placeholder={t.home.searchPlaceholder}
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={handleKey}
         />
         {searched
-          ? <button className="btn btn-ghost" onClick={clearSearch}>✕ Clear</button>
+          ? <button className="btn btn-ghost" onClick={clearSearch}>{t.home.clear}</button>
           : <button className="btn btn-primary" onClick={search} disabled={searchLoading || !query.trim()}>
-              {searchLoading ? <span className="spinner" /> : 'Search'}
+              {searchLoading ? <span className="spinner" /> : t.home.search}
             </button>
         }
       </div>
 
-      {/* ── Search results ── */}
       {!showHome && (
         <>
-          {searchLoading && <div className="loading"><span className="spinner" /> Searching...</div>}
+          {searchLoading && <div className="loading"><span className="spinner" /></div>}
           {searchError && <div className="error-msg">{searchError}</div>}
           {!searchLoading && searched && results.length === 0 && !searchError && (
             <div className="empty-state">
-              <h3>No results found</h3>
-              <p>Try a different title or check for typos.</p>
+              <h3>{t.home.noResults}</h3>
+              <p>{t.home.noResultsDesc}</p>
             </div>
           )}
           {!searchLoading && results.length > 0 && (
             <>
-              <p className="results-count">{results.length} result{results.length !== 1 ? 's' : ''}</p>
+              <p className="results-count">{t.home.results(results.length)}</p>
               <div className="grid">
                 {results.map(movie => (
                   <MovieCard
@@ -127,11 +126,10 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove, count
         </>
       )}
 
-      {/* ── Home content ── */}
       {showHome && (
         <>
           <HomeSection
-            title="Trending Now"
+            title={t.home.trendingNow}
             movies={trending}
             loading={trendingLoading}
             error={trendingError}
@@ -139,16 +137,20 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove, count
             getMovieStatus={getMovieStatus}
             onAdd={onAdd}
             onRemove={onRemove}
+            serverWakingUp={t.home.serverWakingUp}
+            tryAgain={t.home.tryAgain}
           />
           {related.map(({ baseTitle, movies }) => (
             <HomeSection
               key={baseTitle}
-              title={<>Because you watched <span>{baseTitle}</span></>}
+              title={<>{t.home.becauseYouWatched} <span>{baseTitle}</span></>}
               movies={movies}
               loading={false}
               getMovieStatus={getMovieStatus}
               onAdd={onAdd}
               onRemove={onRemove}
+              serverWakingUp={t.home.serverWakingUp}
+              tryAgain={t.home.tryAgain}
             />
           ))}
         </>
@@ -157,7 +159,7 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove, count
   );
 }
 
-function HomeSection({ title, movies, loading, error, onRetry, getMovieStatus, onAdd, onRemove }) {
+function HomeSection({ title, movies, loading, error, onRetry, getMovieStatus, onAdd, onRemove, serverWakingUp, tryAgain }) {
   return (
     <section className="home-section">
       <h2 className="home-section-title">{title}</h2>
@@ -167,8 +169,8 @@ function HomeSection({ title, movies, loading, error, onRetry, getMovieStatus, o
         </div>
       ) : error || movies.length === 0 ? (
         <div className="home-row-empty">
-          <span>The server is waking up — </span>
-          <button className="home-retry-btn" onClick={onRetry}>try again</button>
+          <span>{serverWakingUp}</span>
+          <button className="home-retry-btn" onClick={onRetry}>{tryAgain}</button>
         </div>
       ) : (
         <div className="home-row">

@@ -242,6 +242,41 @@
 
 .theme-toggle:hover { background: var(--surface2); color: var(--text); }
 
+.lang-toggle {
+  display: flex;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.lang-toggle button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.03em;
+}
+
+.lang-toggle button:first-child {
+  border-right: 1px solid var(--border);
+}
+
+.lang-toggle button.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.lang-toggle button:not(.active):hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
 /* ── Bottom nav (mobile only) ── */
 .bottom-nav { display: none; }
 

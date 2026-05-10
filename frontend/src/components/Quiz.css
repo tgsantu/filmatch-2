@@ -212,8 +212,13 @@
   margin-bottom: 0;
 }
 
-@media (max-width: 480px) {
-  .options-grid { grid-template-columns: 1fr; }
-  .question-card { padding: 1.25rem; }
-  .question-text { font-size: 1rem; }
+@media (max-width: 640px) {
+  .options-grid { grid-template-columns: 1fr; gap: 0.5rem; }
+  .question-card { padding: 1.25rem; border-radius: 12px; }
+  .question-text { font-size: 1rem; margin-bottom: 1rem; }
+  .quiz-intro { padding: 2rem 1rem; }
+  .quiz-intro h2 { font-size: 1.25rem; }
+  .quiz-start-btn { width: 100%; justify-content: center; }
+  .quiz-progress { margin-bottom: 1.25rem; }
+  .results-header { margin-bottom: 0.25rem; }
 }

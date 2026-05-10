@@ -93,11 +93,11 @@ export default function App() {
   }, [library]);
 
   const tabs = [
-    { id: 'search', label: t.tabs.home },
-    { id: 'library', label: t.tabs.library },
-    { id: 'recommendations', label: t.tabs.recommendations },
-    { id: 'quiz', label: t.tabs.discover },
-    { id: 'settings', label: t.tabs.settings },
+    { id: 'search',          label: t.tabs.home,            icon: '🏠' },
+    { id: 'library',         label: t.tabs.library,         icon: '📚' },
+    { id: 'recommendations', label: t.tabs.recommendations, icon: '⭐' },
+    { id: 'quiz',            label: t.tabs.discover,        icon: '🎬' },
+    { id: 'settings',        label: t.tabs.settings,        icon: '⚙️' },
   ];
 
   if (user === undefined) {
@@ -124,7 +124,7 @@ export default function App() {
                 className={`nav-btn ${tab === tab2.id ? 'active' : ''}`}
                 onClick={() => setTab(tab2.id)}
               >
-                {tab2.label}
+                <span className="nav-tab-label">{tab2.label}</span>
               </button>
             ))}
           </nav>
@@ -164,13 +164,10 @@ export default function App() {
           <Recommendations library={library} onAdd={addToLibrary} country={settings.country} />
         )}
         {tab === 'quiz' && <Quiz onAdd={addToLibrary} country={settings.country} />}
-        {tab === 'settings' && <Settings settings={settings} onSave={saveSettings} />}
+        {tab === 'settings' && <Settings settings={settings} onSave={saveSettings} onSignOut={() => signOut(auth)} />}
       </main>
 
-      <footer className="footer">
-        <p>Developed by <a href="https://www.instagram.com/tgsantu17/" target="_blank" rel="noreferrer">@tgsantu17</a></p>
-        <p><a href="mailto:tgsantu17@gmail.com">tgsantu17@gmail.com</a></p>
-      </footer>
+
 
       <nav className="bottom-nav">
         {tabs.map(tab2 => (
@@ -179,7 +176,8 @@ export default function App() {
             className={`nav-btn ${tab === tab2.id ? 'active' : ''}`}
             onClick={() => setTab(tab2.id)}
           >
-            {tab2.label}
+            <span className="nav-tab-icon">{tab2.icon}</span>
+            <span className="nav-tab-label">{tab2.label}</span>
           </button>
         ))}
       </nav>

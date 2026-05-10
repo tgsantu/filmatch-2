@@ -17,7 +17,7 @@ const COUNTRIES = [
   { code: 'JP', name: 'Japan' },
 ];
 
-export default function Settings({ settings, onSave }) {
+export default function Settings({ settings, onSave, onSignOut }) {
   const { t } = useLanguage();
   const [country, setCountry] = useState(settings?.country || 'AR');
   const [saving, setSaving] = useState(false);
@@ -64,6 +64,17 @@ export default function Settings({ settings, onSave }) {
           <div className="info-item"><span className="info-icon">💤</span><div><p className="info-title">{t.settings.freeHosting}</p><p className="info-desc">{t.settings.freeHostingDesc}</p></div></div>
         </div>
       </div>
+
+      <div className="settings-signout">
+        <button className="btn btn-ghost settings-signout-btn" onClick={onSignOut}>
+          {t.common.signOut}
+        </button>
+      </div>
+
+      <footer className="settings-footer">
+        <p>Developed by <a href="https://www.instagram.com/tgsantu17/" target="_blank" rel="noreferrer">@tgsantu17</a></p>
+        <p><a href="mailto:tgsantu17@gmail.com">tgsantu17@gmail.com</a></p>
+      </footer>
     </div>
   );
 }

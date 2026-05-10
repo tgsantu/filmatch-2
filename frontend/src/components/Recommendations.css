@@ -20,3 +20,9 @@
 }
 
 .results-count { font-size: 0.85rem; color: var(--text-muted); }
+
+@media (max-width: 640px) {
+  .rec-prompt { padding: 2.5rem 1rem; }
+  .rec-prompt h2 { font-size: 1.2rem; }
+  .rec-btn { width: 100%; justify-content: center; }
+}

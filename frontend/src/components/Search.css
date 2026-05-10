@@ -98,5 +98,9 @@
 }
 
 @media (max-width: 640px) {
-  .home-row-card { width: 130px; }
+  .home-row-card { width: 128px; }
+  .home-section { margin-bottom: 1.75rem; }
+  .home-section-title { font-size: 0.9rem; margin-bottom: 0.75rem; }
+  .search-bar { gap: 0.5rem; margin-bottom: 1.25rem; }
+  .search-input { font-size: 0.9rem; padding: 0.65rem 0.875rem; }
 }

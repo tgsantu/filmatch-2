@@ -58,9 +58,8 @@ export default function Settings({ settings, onSave }) {
         <h2 className="settings-section-title">About Filmatch</h2>
         <div className="info-grid">
           <div className="info-item"><span className="info-icon"><img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg" alt="TMDB" className="tmdb-logo" /></span><div><p className="info-title">TMDB</p><p className="info-desc">Movie data, posters & metadata</p></div></div>
-          <div className="info-item"><span className="info-icon">📺</span><div><p className="info-title">Streaming Availability API</p><p className="info-desc">Real-time streaming platform data</p></div></div>
-          <div className="info-item"><span className="info-icon">🤖</span><div><p className="info-title">Groq + LLaMA 3.3 70B</p><p className="info-desc">AI-powered recommendations & quiz</p></div></div>
-          <div className="info-item"><span className="info-icon">🔥</span><div><p className="info-title">Firebase</p><p className="info-desc">Auth & cloud storage per account</p></div></div>
+          <div className="info-item"><span className="info-icon">📺</span><div><p className="info-title">Movie of the Night API</p><p className="info-desc">Real-time streaming platform data</p></div></div>
+          <div className="info-item"><span className="info-icon">💤</span><div><p className="info-title">Free hosting</p><p className="info-desc">To keep this app free, the server sleeps when idle. AI features may take up to 30 s on first use — just wait a moment!</p></div></div>
         </div>
       </div>
     </div>

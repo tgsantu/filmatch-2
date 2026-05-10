@@ -159,6 +159,21 @@ export default function App() {
         <p>Developed by <a href="https://www.instagram.com/tgsantu17/" target="_blank" rel="noreferrer">@tgsantu17</a></p>
         <p><a href="mailto:tgsantu17@gmail.com">tgsantu17@gmail.com</a></p>
       </footer>
+
+      <nav className="bottom-nav">
+        {TABS.map(t => (
+          <button
+            key={t.id}
+            className={`nav-btn ${tab === t.id ? 'active' : ''}`}
+            onClick={() => setTab(t.id)}
+          >
+            {t.label}
+            {t.id === 'library' && library.length > 0 && (
+              <span className="badge">{library.length}</span>
+            )}
+          </button>
+        ))}
+      </nav>
     </div>
   );
 }

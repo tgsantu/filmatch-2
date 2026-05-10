@@ -26,20 +26,34 @@ function formatMovie(m) {
 }
 
 router.get('/trending', async (req, res) => {
-  const country = (req.query.country || 'US').toUpperCase();
+  const country = (req.query.country || 'us').toLowerCase();
   try {
-    const r = await axios.get(`${TMDB_BASE}/discover/movie`, {
+    const r = await axios.get('https://streaming-availability.p.rapidapi.com/shows/search/filters', {
+      headers: {
+        'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+        'x-rapidapi-host': 'streaming-availability.p.rapidapi.com',
+      },
       params: {
-        api_key: process.env.TMDB_API_KEY,
-        language: 'en-US',
-        sort_by: 'popularity.desc',
-        with_watch_monetization_types: 'flatrate|free|ads',
-        watch_region: country,
-        include_adult: false,
-        page: 1,
+        country,
+        show_type: 'movie',
+        order_by: 'popularity_1year',
+        output_language: 'en',
       },
     });
-    res.json(r.data.results.slice(0, 20).map(formatMovie));
+
+    const shows = (r.data.shows || []).slice(0, 20);
+    const movies = shows.map(show => ({
+      tmdb_id: show.tmdbId,
+      title: show.title,
+      poster_path: show.imageSet?.verticalPoster?.w360
+        || show.imageSet?.verticalPoster?.w240
+        || null,
+      release_year: show.releaseYear ? String(show.releaseYear) : null,
+      overview: show.overview || '',
+      genres: (show.genres || []).map(g => g.name).filter(Boolean),
+    }));
+
+    res.json(movies);
   } catch {
     res.status(502).json({ error: 'Failed to fetch trending movies' });
   }

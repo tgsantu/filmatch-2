@@ -60,6 +60,7 @@ function LibraryCard({ movie, onRemove, onStatusChange, country }) {
   const [streaming, setStreaming] = useState(null);
   const [loadingStream, setLoadingStream] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [showFullOverview, setShowFullOverview] = useState(false);
   const genres = Array.isArray(movie.genres) ? movie.genres : [];
 
   const fetchStreaming = async () => {
@@ -115,7 +116,16 @@ function LibraryCard({ movie, onRemove, onStatusChange, country }) {
 
       {expanded && (
         <div className="card-detail">
-          {movie.overview && <p className="card-overview">{movie.overview}</p>}
+          {movie.overview && (
+            <div>
+              <p className={`card-overview ${showFullOverview ? 'full' : ''}`}>{movie.overview}</p>
+              {movie.overview.length > 150 && (
+                <button className="read-more-btn" onClick={() => setShowFullOverview(v => !v)}>
+                  {showFullOverview ? 'Read less' : 'Read more'}
+                </button>
+              )}
+            </div>
+          )}
           <div className="streaming-section">
             <p className="streaming-label">Where to watch</p>
             {loadingStream && <p className="streaming-loading">Loading...</p>}

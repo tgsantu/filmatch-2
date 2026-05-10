@@ -1,4 +1,5 @@
 node_modules/
+frontend/.env.local
 .env
 backend/filmatch.json
 backend/*.log

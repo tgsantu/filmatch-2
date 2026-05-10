@@ -9,6 +9,7 @@ export default function RecommendationCard({ movie, onAdd, country = 'AR' }) {
   const [loadingStream, setLoadingStream] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [added, setAdded] = useState(null);
+  const [showFullOverview, setShowFullOverview] = useState(false);
 
   const toggle = async () => {
     if (!expanded && movie.tmdb_id && !streaming) {
@@ -50,7 +51,16 @@ export default function RecommendationCard({ movie, onAdd, country = 'AR' }) {
 
       {expanded && (
         <div className="card-detail">
-          {movie.overview && <p className="card-overview">{movie.overview}</p>}
+          {movie.overview && (
+            <div>
+              <p className={`card-overview ${showFullOverview ? 'full' : ''}`}>{movie.overview}</p>
+              {movie.overview.length > 150 && (
+                <button className="read-more-btn" onClick={() => setShowFullOverview(v => !v)}>
+                  {showFullOverview ? 'Read less' : 'Read more'}
+                </button>
+              )}
+            </div>
+          )}
           {movie.reason && <p className="card-reason"><span>Why you'll love it:</span> {movie.reason}</p>}
 
           <div className="streaming-section">

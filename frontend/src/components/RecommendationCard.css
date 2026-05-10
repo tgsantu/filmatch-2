@@ -81,3 +81,6 @@
 .platform-type { opacity: 0.75; }
 .card-detail { padding: 0.75rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 0.6rem; }
 .card-overview { font-size: 0.78rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.card-overview.full { display: block; -webkit-line-clamp: unset; overflow: visible; }
+.read-more-btn { background: none; border: none; color: var(--accent); font-family: inherit; font-size: 0.75rem; font-weight: 600; cursor: pointer; padding: 0.2rem 0; margin-top: 0.1rem; display: block; }
+.read-more-btn:hover { text-decoration: underline; }

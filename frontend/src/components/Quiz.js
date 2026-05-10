@@ -4,46 +4,68 @@ import RecommendationCard from './RecommendationCard';
 import './Quiz.css';
 
 export default function Quiz({ onAdd, country }) {
-  const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({});
   const [step, setStep] = useState('intro');
+  const [seeds, setSeeds] = useState([]);
+  const [history, setHistory] = useState([]);
+  const [current, setCurrent] = useState(null);
+  const [seedIndex, setSeedIndex] = useState(0);
   const [results, setResults] = useState([]);
   const [error, setError] = useState('');
-  const [currentQ, setCurrentQ] = useState(0);
+  const [loadingNext, setLoadingNext] = useState(false);
 
   useEffect(() => {
-    axios.get('/api/quiz/questions')
-      .then(res => setQuestions(res.data))
-      .catch(() => setError('Failed to load quiz questions.'));
+    axios.get('/api/quiz/seed')
+      .then(res => setSeeds(res.data))
+      .catch(() => setError('Failed to load quiz.'));
   }, []);
 
-  const handleAnswer = (questionId, answer) => {
-    const newAnswers = { ...answers, [questionId]: answer };
-    setAnswers(newAnswers);
-    if (currentQ < questions.length - 1) {
-      setTimeout(() => setCurrentQ(q => q + 1), 300);
-    }
-  };
-
-  const submit = async () => {
-    setStep('loading');
+  const start = () => {
+    if (seeds.length === 0) return;
+    setCurrent(seeds[0]);
+    setSeedIndex(0);
+    setHistory([]);
+    setStep('quiz');
     setError('');
-    try {
-      const res = await axios.post('/api/quiz/submit', { answers });
-      setResults(res.data);
-      setStep('results');
-    } catch (err) {
-      setError(err.response?.data?.error || 'Failed to get recommendations.');
-      setStep('quiz');
-    }
   };
 
   const restart = () => {
-    setAnswers({});
-    setCurrentQ(0);
+    setHistory([]);
+    setSeedIndex(0);
+    setCurrent(null);
     setResults([]);
     setError('');
     setStep('intro');
+  };
+
+  const handleAnswer = async (answer) => {
+    const newEntry = { question: current.question, answer };
+    const newHistory = [...history, newEntry];
+    setHistory(newHistory);
+
+    const nextSeedIndex = seedIndex + 1;
+    if (nextSeedIndex < seeds.length) {
+      setSeedIndex(nextSeedIndex);
+      setCurrent(seeds[nextSeedIndex]);
+      return;
+    }
+
+    setLoadingNext(true);
+    setCurrent(null);
+    setError('');
+
+    try {
+      const res = await axios.post('/api/quiz/next', { history: newHistory });
+      if (res.data.done) {
+        setResults(res.data.recommendations);
+        setStep('results');
+      } else {
+        setCurrent(res.data);
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Something went wrong. Try again.');
+    } finally {
+      setLoadingNext(false);
+    }
   };
 
   if (step === 'intro') {
@@ -53,25 +75,14 @@ export default function Quiz({ onAdd, country }) {
         <div className="quiz-intro">
           <div className="quiz-intro-icon">🎯</div>
           <h2>Find your perfect movie</h2>
-          <p>Answer {questions.length} quick questions and our AI will find movies tailored to your mood.</p>
+          <p>Answer a few questions and our AI adapts each one to your taste — no two quizzes are alike.</p>
           <div className="quiz-features">
-            <span>Mood</span><span>Genre</span><span>Decade</span><span>Themes</span><span>Language</span>
+            <span>Adaptive</span><span>AI-powered</span><span>Personalized</span>
           </div>
-          <button className="btn btn-primary quiz-start-btn" onClick={() => setStep('quiz')} disabled={questions.length === 0}>
+          {error && <p className="quiz-error">{error}</p>}
+          <button className="btn btn-primary quiz-start-btn" onClick={start} disabled={seeds.length === 0}>
             Start Quiz →
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (step === 'loading') {
-    return (
-      <div>
-        <h1 className="section-title">Discover</h1>
-        <div className="loading" style={{ flexDirection: 'column', gap: '1rem', padding: '6rem' }}>
-          <span className="spinner" style={{ width: 40, height: 40, borderWidth: 3 }} />
-          <p>Finding your perfect movies...</p>
         </div>
       </div>
     );
@@ -84,7 +95,7 @@ export default function Quiz({ onAdd, country }) {
           <h1 className="section-title">Your Picks</h1>
           <button className="btn btn-ghost" onClick={restart}>Take Again</button>
         </div>
-        <p className="section-subtitle">Based on your quiz answers</p>
+        <p className="section-subtitle">Based on your {history.length} answers — tailored just for you</p>
         <div className="grid">
           {results.map((movie, i) => (
             <RecommendationCard key={i} movie={movie} onAdd={onAdd} country={country} />
@@ -94,10 +105,7 @@ export default function Quiz({ onAdd, country }) {
     );
   }
 
-  const q = questions[currentQ];
-  const answered = Object.keys(answers).length;
-  const allAnswered = answered === questions.length;
-  const progress = (currentQ / questions.length) * 100;
+  const questionNum = history.length + 1;
 
   return (
     <div>
@@ -108,23 +116,32 @@ export default function Quiz({ onAdd, country }) {
 
       <div className="quiz-progress">
         <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${progress}%` }} />
+          <div className="progress-fill adaptive" />
         </div>
-        <span className="progress-text">{answered}/{questions.length} answered</span>
+        <span className="progress-text">{history.length} answered</span>
       </div>
 
       {error && <div className="error-msg">{error}</div>}
 
-      {q && (
-        <div className="question-card">
-          <p className="question-num">Question {currentQ + 1} of {questions.length}</p>
-          <h2 className="question-text">{q.question}</h2>
+      {loadingNext && (
+        <div className="quiz-loading">
+          <div className="quiz-loading-dots">
+            <span /><span /><span />
+          </div>
+          <p>Thinking of the next question...</p>
+        </div>
+      )}
+
+      {!loadingNext && current && (
+        <div className="question-card" key={current.question}>
+          <p className="question-num">Question {questionNum}</p>
+          <h2 className="question-text">{current.question}</h2>
           <div className="options-grid">
-            {q.options.map((opt, i) => (
+            {current.options.map((opt, i) => (
               <button
                 key={i}
-                className={`option-btn ${answers[q.id] === opt ? 'selected' : ''}`}
-                onClick={() => handleAnswer(q.id, opt)}
+                className="option-btn"
+                onClick={() => handleAnswer(opt)}
               >
                 <span className="option-letter">{String.fromCharCode(65 + i)}</span>
                 {opt}
@@ -133,20 +150,6 @@ export default function Quiz({ onAdd, country }) {
           </div>
         </div>
       )}
-
-      <div className="quiz-nav">
-        <button className="btn btn-secondary" onClick={() => setCurrentQ(q => Math.max(0, q - 1))} disabled={currentQ === 0}>
-          ← Back
-        </button>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {currentQ < questions.length - 1 && (
-            <button className="btn btn-ghost" onClick={() => setCurrentQ(q => q + 1)}>Skip →</button>
-          )}
-          <button className="btn btn-primary" onClick={submit} disabled={!allAnswered}>
-            {allAnswered ? 'Get My Movies ✨' : `${answered}/${questions.length} answered`}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

@@ -98,6 +98,27 @@
   overflow: hidden;
 }
 
+.card-overview.full {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.read-more-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.2rem 0;
+  margin-top: 0.1rem;
+  display: block;
+}
+
+.read-more-btn:hover { text-decoration: underline; }
+
 .streaming-section { display: flex; flex-direction: column; gap: 0.35rem; }
 .streaming-label { font-size: 0.7rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
 .streaming-loading, .streaming-none { font-size: 0.75rem; color: var(--text-muted); }

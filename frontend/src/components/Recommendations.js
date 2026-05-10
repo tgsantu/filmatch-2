@@ -18,8 +18,9 @@ export default function Recommendations({ library, onAdd, country }) {
     setLoading(true);
     setError('');
     try {
-      const res = await axios.post('/api/recommendations', { movies: seenMovies });
-      setRecs(res.data);
+      const res = await axios.post('/api/recommendations', { movies: seenMovies, library });
+      const libraryIds = new Set(library.map(m => m.tmdb_id));
+      setRecs(res.data.filter(m => !libraryIds.has(m.tmdb_id)));
       setGenerated(true);
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to generate recommendations.');

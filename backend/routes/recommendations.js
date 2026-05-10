@@ -6,7 +6,7 @@ const GROQ_BASE = 'https://api.groq.com/openai/v1/chat/completions';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 
 router.post('/', async (req, res) => {
-  const { movies } = req.body;
+  const { movies, library } = req.body;
   if (!movies || movies.length === 0) {
     return res.status(400).json({ error: 'Add some movies to your "Seen" list first to get recommendations.' });
   }
@@ -16,7 +16,11 @@ router.post('/', async (req, res) => {
     return `"${m.title}" (${m.release_year || 'N/A'}) - Genres: ${genres.join(', ') || 'Unknown'}`;
   }).join('\n');
 
-  const prompt = `Based on these movies the user has watched:\n${movieList}\n\nRecommend exactly 6 movies they haven't seen yet. Return ONLY a JSON array with this exact structure, no extra text:\n[\n  {\n    "title": "Movie Title",\n    "year": 2020,\n    "reason": "Short reason why they'd like it based on their taste"\n  }\n]`;
+  const excludeList = Array.isArray(library) && library.length > 0
+    ? `\n\nDo NOT recommend any of these movies (already in the user's list):\n${library.map(m => `"${m.title}"`).join(', ')}`
+    : '';
+
+  const prompt = `Based on these movies the user has watched:\n${movieList}${excludeList}\n\nRecommend exactly 9 different movies they haven't seen yet and are not in the list above. Return ONLY a JSON array with this exact structure, no extra text:\n[\n  {\n    "title": "Movie Title",\n    "year": 2020,\n    "reason": "Short reason why they'd like it based on their taste"\n  }\n]`;
 
   try {
     const groqRes = await axios.post(GROQ_BASE, {

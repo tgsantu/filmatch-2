@@ -135,6 +135,7 @@ const translations = {
       movieOfNightDesc: 'Datos de disponibilidad en streaming en tiempo real',
       freeHosting: 'Hosting gratuito',
       freeHostingDesc: 'Para mantener esta app gratuita, el servidor se duerme cuando está inactivo. Las funciones de IA pueden tardar hasta 30 s la primera vez — ¡esperá un momento!',
+      credits: 'Créditos',
     },
     common: {
       signOut: 'Cerrar sesión',
@@ -277,6 +278,7 @@ const translations = {
       movieOfNightDesc: 'Real-time streaming platform data',
       freeHosting: 'Free hosting',
       freeHostingDesc: 'To keep this app free, the server sleeps when idle. AI features may take up to 30 s on first use — just wait a moment!',
+      credits: 'Credits',
     },
     common: {
       signOut: 'Sign out',

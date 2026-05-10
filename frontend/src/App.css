@@ -240,36 +240,42 @@
   .logo-text { font-size: 1.1rem; }
   .user-email { display: none; }
 
-  /* Push content above the fixed bottom bar */
-  .main { padding: 1.25rem 1rem 5.5rem; }
-  .footer { padding-bottom: calc(60px + 0.75rem); }
+  /* Push content above the floating bottom nav */
+  .main { padding: 1.25rem 1rem 7rem; }
+  .footer { padding-bottom: calc(90px + 0.75rem); }
 
   .grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 
-  /* Fixed bottom navigation */
+  /* Floating pill bottom navigation */
   .bottom-nav {
     display: flex;
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 16px;
+    left: 16px;
+    right: 16px;
     z-index: 100;
-    background: rgba(13, 13, 15, 0.98);
-    border-top: 1px solid var(--border);
-    backdrop-filter: blur(10px);
-    height: 60px;
-    padding-bottom: env(safe-area-inset-bottom);
+    background: rgba(24, 24, 27, 0.97);
+    border: 1px solid rgba(63, 63, 70, 0.7);
+    border-radius: 24px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    height: 58px;
+    padding: 5px;
+    gap: 3px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
   }
 
   .bottom-nav .nav-btn {
     flex: 1;
     flex-direction: column;
     gap: 0;
-    font-size: 0.7rem;
-    padding: 0.4rem 0.25rem;
-    border-radius: 0;
+    font-size: 0.68rem;
+    font-weight: 500;
+    padding: 0.3rem 0.25rem;
+    border-radius: 18px;
     height: 100%;
     justify-content: center;
+    transition: all 0.2s;
   }
 
   .bottom-nav .nav-btn .badge {

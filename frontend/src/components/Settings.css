@@ -70,26 +70,13 @@
 .info-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.15rem; }
 .info-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
 
-.settings-footer {
-  text-align: center;
-  padding: 0.5rem 0 0.25rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-}
-
-.settings-footer p {
-  font-size: 0.78rem;
-  color: var(--text-muted);
-}
-
-.settings-footer a {
+.info-link {
   color: var(--accent);
   text-decoration: none;
   font-weight: 500;
 }
 
-.settings-footer a:hover { text-decoration: underline; }
+.info-link:hover { text-decoration: underline; }
 
 .settings-signout {
   display: none;

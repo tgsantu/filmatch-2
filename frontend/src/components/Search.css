@@ -25,3 +25,42 @@
   color: var(--text-muted);
   margin-bottom: 1rem;
 }
+
+.home-section {
+  margin-bottom: 2.25rem;
+}
+
+.home-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 0.875rem;
+}
+
+.home-section-title span {
+  color: var(--accent);
+}
+
+.home-row {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+
+.home-row::-webkit-scrollbar { height: 4px; }
+.home-row::-webkit-scrollbar-track { background: transparent; }
+.home-row::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.home-row-card {
+  flex-shrink: 0;
+  width: 150px;
+  scroll-snap-align: start;
+}
+
+@media (max-width: 640px) {
+  .home-row-card { width: 130px; }
+}

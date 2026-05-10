@@ -14,7 +14,7 @@ import Settings from './components/Settings';
 import './App.css';
 
 const TABS = [
-  { id: 'search', label: 'Search' },
+  { id: 'search', label: 'Home' },
   { id: 'library', label: 'Library' },
   { id: 'recommendations', label: 'For You' },
   { id: 'quiz', label: 'Discover' },

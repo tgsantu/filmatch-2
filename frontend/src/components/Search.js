@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import MovieCard from './MovieCard';
 import './Search.css';
@@ -6,33 +6,70 @@ import './Search.css';
 export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
   const [searched, setSearched] = useState(false);
+
+  const [trending, setTrending] = useState([]);
+  const [trendingLoading, setTrendingLoading] = useState(true);
+
+  const [related, setRelated] = useState([]);
+
+  // Fetch trending once on mount
+  useEffect(() => {
+    axios.get('/api/home/trending')
+      .then(r => setTrending(r.data))
+      .catch(() => {})
+      .finally(() => setTrendingLoading(false));
+  }, []);
+
+  // Fetch "because you watched" when seen list changes
+  const seenMovies = library.filter(m => m.status === 'seen' && m.tmdb_id);
+  const seenKey = seenMovies.slice(0, 2).map(m => m.tmdb_id).join(',');
+
+  useEffect(() => {
+    if (!seenKey) { setRelated([]); return; }
+    const picks = seenMovies.slice(0, 2);
+    Promise.all(
+      picks.map(m =>
+        axios.get(`/api/home/similar/${m.tmdb_id}`)
+          .then(r => ({ baseTitle: m.title, movies: r.data }))
+          .catch(() => null)
+      )
+    ).then(sections => setRelated(sections.filter(Boolean)));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seenKey]);
 
   const search = useCallback(async () => {
     const q = query.trim();
     if (!q) return;
-    setLoading(true);
-    setError('');
+    setSearchLoading(true);
+    setSearchError('');
     setSearched(true);
     try {
       const res = await axios.get('/api/movies/search', { params: { query: q } });
       setResults(res.data);
     } catch (err) {
-      setError(err.response?.data?.error || 'Search failed. Please try again.');
+      setSearchError(err.response?.data?.error || 'Search failed. Please try again.');
       setResults([]);
     } finally {
-      setLoading(false);
+      setSearchLoading(false);
     }
   }, [query]);
 
+  const clearSearch = () => {
+    setQuery('');
+    setSearched(false);
+    setResults([]);
+    setSearchError('');
+  };
+
   const handleKey = (e) => { if (e.key === 'Enter') search(); };
+
+  const showHome = !searched;
 
   return (
     <div>
-      <h1 className="section-title">Find Movies</h1>
-
       <div className="search-bar">
         <input
           type="text"
@@ -41,40 +78,97 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={handleKey}
-          autoFocus
         />
-        <button className="btn btn-primary" onClick={search} disabled={loading || !query.trim()}>
-          {loading ? <span className="spinner" /> : 'Search'}
-        </button>
+        {searched
+          ? <button className="btn btn-ghost" onClick={clearSearch}>✕ Clear</button>
+          : <button className="btn btn-primary" onClick={search} disabled={searchLoading || !query.trim()}>
+              {searchLoading ? <span className="spinner" /> : 'Search'}
+            </button>
+        }
       </div>
 
-      {error && <div className="error-msg">{error}</div>}
-      {loading && <div className="loading"><span className="spinner" /> Searching...</div>}
-
-      {!loading && searched && results.length === 0 && !error && (
-        <div className="empty-state">
-          <h3>No results found</h3>
-          <p>Try a different title or check for typos.</p>
-        </div>
+      {/* ── Search results ── */}
+      {!showHome && (
+        <>
+          {searchLoading && <div className="loading"><span className="spinner" /> Searching...</div>}
+          {searchError && <div className="error-msg">{searchError}</div>}
+          {!searchLoading && searched && results.length === 0 && !searchError && (
+            <div className="empty-state">
+              <h3>No results found</h3>
+              <p>Try a different title or check for typos.</p>
+            </div>
+          )}
+          {!searchLoading && results.length > 0 && (
+            <>
+              <p className="results-count">{results.length} result{results.length !== 1 ? 's' : ''}</p>
+              <div className="grid">
+                {results.map(movie => (
+                  <MovieCard
+                    key={movie.tmdb_id}
+                    movie={movie}
+                    libraryStatus={getMovieStatus(movie.tmdb_id)}
+                    onAdd={onAdd}
+                    onRemove={onRemove}
+                    showStreaming
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </>
       )}
 
-      {!loading && results.length > 0 && (
+      {/* ── Home content ── */}
+      {showHome && (
         <>
-          <p className="results-count">{results.length} result{results.length !== 1 ? 's' : ''}</p>
-          <div className="grid">
-            {results.map(movie => (
+          <HomeSection
+            title="Trending Now"
+            movies={trending}
+            loading={trendingLoading}
+            getMovieStatus={getMovieStatus}
+            onAdd={onAdd}
+            onRemove={onRemove}
+          />
+          {related.map(({ baseTitle, movies }) => (
+            <HomeSection
+              key={baseTitle}
+              title={<>Because you watched <span>{baseTitle}</span></>}
+              movies={movies}
+              loading={false}
+              getMovieStatus={getMovieStatus}
+              onAdd={onAdd}
+              onRemove={onRemove}
+            />
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
+function HomeSection({ title, movies, loading, getMovieStatus, onAdd, onRemove }) {
+  return (
+    <section className="home-section">
+      <h2 className="home-section-title">{title}</h2>
+      {loading ? (
+        <div className="loading" style={{ justifyContent: 'flex-start', padding: '1rem 0' }}>
+          <span className="spinner" />
+        </div>
+      ) : (
+        <div className="home-row">
+          {movies.map(movie => (
+            <div className="home-row-card" key={movie.tmdb_id}>
               <MovieCard
-                key={movie.tmdb_id}
                 movie={movie}
                 libraryStatus={getMovieStatus(movie.tmdb_id)}
                 onAdd={onAdd}
                 onRemove={onRemove}
-                showStreaming={true}
+                showStreaming
               />
-            ))}
-          </div>
-        </>
+            </div>
+          ))}
+        </div>
       )}
-    </div>
+    </section>
   );
 }

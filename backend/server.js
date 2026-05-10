@@ -9,6 +9,7 @@ const streamingRouter = require('./routes/streaming');
 const recommendationsRouter = require('./routes/recommendations');
 const quizRouter = require('./routes/quiz');
 const settingsRouter = require('./routes/settings');
+const homeRouter = require('./routes/home');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -22,6 +23,7 @@ app.use('/api/streaming', streamingRouter);
 app.use('/api/recommendations', recommendationsRouter);
 app.use('/api/quiz', quizRouter);
 app.use('/api/settings', settingsRouter);
+app.use('/api/home', homeRouter);
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

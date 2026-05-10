@@ -26,9 +26,18 @@ function formatMovie(m) {
 }
 
 router.get('/trending', async (req, res) => {
+  const country = (req.query.country || 'US').toUpperCase();
   try {
-    const r = await axios.get(`${TMDB_BASE}/trending/movie/week`, {
-      params: { api_key: process.env.TMDB_API_KEY, language: 'en-US' },
+    const r = await axios.get(`${TMDB_BASE}/discover/movie`, {
+      params: {
+        api_key: process.env.TMDB_API_KEY,
+        language: 'en-US',
+        sort_by: 'popularity.desc',
+        with_watch_monetization_types: 'flatrate|free|ads',
+        watch_region: country,
+        include_adult: false,
+        page: 1,
+      },
     });
     res.json(r.data.results.slice(0, 20).map(formatMovie));
   } catch {

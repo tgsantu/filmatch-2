@@ -138,6 +138,7 @@ export default function App() {
             getMovieStatus={getMovieStatus}
             onAdd={addToLibrary}
             onRemove={removeFromLibrary}
+            country={settings.country}
           />
         )}
         {tab === 'library' && (

@@ -3,7 +3,7 @@ import axios from 'axios';
 import MovieCard from './MovieCard';
 import './Search.css';
 
-export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
+export default function Search({ library, getMovieStatus, onAdd, onRemove, country }) {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -19,14 +19,14 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
   const fetchTrending = () => {
     setTrendingLoading(true);
     setTrendingError(false);
-    axios.get('/api/home/trending')
+    axios.get('/api/home/trending', { params: { country } })
       .then(r => setTrending(r.data))
       .catch(() => setTrendingError(true))
       .finally(() => setTrendingLoading(false));
   };
 
-  // Fetch trending once on mount
-  useEffect(() => { fetchTrending(); }, []);
+  // Fetch trending on mount and when country changes
+  useEffect(() => { fetchTrending(); }, [country]); // eslint-disable-line
 
   // Fetch "because you watched" when seen list changes
   const seenKey = library

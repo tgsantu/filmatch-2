@@ -4,7 +4,7 @@ import './Onboarding.css';
 const STEPS = [
   {
     icon: '🎬',
-    title: 'Welcome to Filmatch',
+    title: 'Welcome to theFilMatch',
     description: 'Your personal movie tracker with AI-powered recommendations. Here\'s a quick tour to get you started.',
     tip: null,
   },

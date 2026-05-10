@@ -115,8 +115,8 @@ export default function App() {
       <header className="header">
         <div className="header-inner">
           <div className="logo">
-            <img src={theme === 'light' ? '/logonotextlight.png' : '/logonotext.png'} alt="" className="logo-img" />
-            <span className="logo-text">FilMatch</span>
+            <img src={theme === 'light' ? '/logonotextlightbg.png' : '/logonotext.png'} alt="" className="logo-img" />
+            <span className="logo-text">theFilMatch</span>
           </div>
           <nav className="nav">
             {TABS.map(t => (
@@ -126,9 +126,6 @@ export default function App() {
                 onClick={() => setTab(t.id)}
               >
                 {t.label}
-                {t.id === 'library' && library.length > 0 && (
-                  <span className="badge">{library.length}</span>
-                )}
               </button>
             ))}
           </nav>

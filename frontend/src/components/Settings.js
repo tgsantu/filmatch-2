@@ -62,7 +62,7 @@ export default function Settings({ settings, onSave, onSignOut }) {
           <div className="info-item"><span className="info-icon"><img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_square_2-d537fb228cf3ded904ef09b136fe3fec72548ebc1fea3fbbd1ad9e36364db38b.svg" alt="TMDB" className="tmdb-logo" /></span><div><p className="info-title">TMDB</p><p className="info-desc">{t.settings.tmdbDesc}</p></div></div>
           <div className="info-item"><span className="info-icon">📺</span><div><p className="info-title">Movie of the Night API</p><p className="info-desc">{t.settings.movieOfNightDesc}</p></div></div>
           <div className="info-item"><span className="info-icon">💤</span><div><p className="info-title">{t.settings.freeHosting}</p><p className="info-desc">{t.settings.freeHostingDesc}</p></div></div>
-          <div className="info-item"><span className="info-icon">👨‍💻</span><div><p className="info-title">@tgsantu17</p><p className="info-desc"><a href="https://www.instagram.com/tgsantu17/" target="_blank" rel="noreferrer" className="info-link">Instagram</a> · <a href="mailto:tgsantu17@gmail.com" className="info-link">tgsantu17@gmail.com</a></p></div></div>
+          <div className="info-item"><span className="info-icon">👨‍💻</span><div><p className="info-title">Credits</p><p className="info-desc"><a href="https://www.instagram.com/tgsantu17/" target="_blank" rel="noreferrer" className="info-link">@tgsantu17</a> · <a href="mailto:tgsantu17@gmail.com" className="info-link">tgsantu17@gmail.com</a></p></div></div>
         </div>
       </div>
 

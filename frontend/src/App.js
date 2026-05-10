@@ -154,6 +154,11 @@ export default function App() {
         {tab === 'quiz' && <Quiz onAdd={addToLibrary} country={settings.country} />}
         {tab === 'settings' && <Settings settings={settings} onSave={saveSettings} />}
       </main>
+
+      <footer className="footer">
+        <p>Developed by <a href="https://www.instagram.com/tgsantu17/" target="_blank" rel="noreferrer">@tgsantu17</a></p>
+        <p><a href="mailto:tgsantu17@gmail.com">tgsantu17@gmail.com</a></p>
+      </footer>
     </div>
   );
 }

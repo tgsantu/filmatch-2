@@ -32,7 +32,7 @@
   flex-shrink: 0;
 }
 
-.logo-img { height: 36px; width: auto; display: block; }
+.logo-img { height: 48px; width: auto; display: block; }
 .logo-icon { font-size: 1.5rem; }
 .logo-text {
   font-size: 1.4rem;
@@ -166,6 +166,29 @@
   padding: 4rem 2rem;
   color: var(--text-muted);
 }
+
+.footer {
+  border-top: 1px solid var(--border);
+  padding: 1.25rem 1.5rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: auto;
+}
+
+.footer p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.footer a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.footer a:hover { text-decoration: underline; }
 
 .empty-state h3 { font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text); }
 .empty-state p { font-size: 0.875rem; }

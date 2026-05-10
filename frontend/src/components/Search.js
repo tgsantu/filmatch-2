@@ -24,12 +24,17 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
   }, []);
 
   // Fetch "because you watched" when seen list changes
-  const seenMovies = library.filter(m => m.status === 'seen' && m.tmdb_id);
-  const seenKey = seenMovies.slice(0, 2).map(m => m.tmdb_id).join(',');
+  const seenKey = library
+    .filter(m => m.status === 'seen' && m.tmdb_id)
+    .slice(0, 2)
+    .map(m => m.tmdb_id)
+    .join(',');
 
   useEffect(() => {
-    if (!seenKey) { setRelated([]); return; }
-    const picks = seenMovies.slice(0, 2);
+    const picks = library
+      .filter(m => m.status === 'seen' && m.tmdb_id)
+      .slice(0, 2);
+    if (picks.length === 0) { setRelated([]); return; }
     Promise.all(
       picks.map(m =>
         axios.get(`/api/home/similar/${m.tmdb_id}`)
@@ -37,8 +42,7 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
           .catch(() => null)
       )
     ).then(sections => setRelated(sections.filter(Boolean)));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seenKey]);
+  }, [seenKey]); // seenKey is a stable primitive derived from library
 
   const search = useCallback(async () => {
     const q = query.trim();

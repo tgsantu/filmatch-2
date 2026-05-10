@@ -78,7 +78,7 @@
   transition: all 0.15s;
 }
 
-.remove-btn:hover { background: rgba(225,29,72,0.2); color: var(--accent); }
+.remove-btn:hover { background: rgba(254,96,17,0.2); color: var(--accent); }
 
 .card-detail {
   padding: 0.75rem;

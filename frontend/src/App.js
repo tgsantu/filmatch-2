@@ -107,8 +107,8 @@ export default function App() {
       <header className="header">
         <div className="header-inner">
           <div className="logo">
-            <span className="logo-icon">🎬</span>
-            <span className="logo-text">Filmatch</span>
+            <img src="/logonotext.png" alt="" className="logo-img" />
+            <span className="logo-text">FilMatch</span>
           </div>
           <nav className="nav">
             {TABS.map(t => (

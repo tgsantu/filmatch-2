@@ -49,8 +49,7 @@ export default function Auth() {
     <div className="auth-screen">
       <div className="auth-card">
         <div className="auth-logo">
-          <span>🎬</span>
-          <h1>Filmatch</h1>
+          <img src="/logo.png" alt="Filmatch" style={{ height: '72px', width: 'auto' }} />
         </div>
         <p className="auth-tagline">Your personal movie tracker</p>
         <p className="auth-description">Search any movie, build your watchlist, and get AI-powered recommendations based on what you love. Streaming availability included.</p>

@@ -43,7 +43,7 @@ router.get('/trending', async (req, res) => {
 
     const shows = (r.data.shows || []).slice(0, 20);
     const movies = shows.map(show => ({
-      tmdb_id: show.tmdbId,
+      tmdb_id: show.tmdbId ? parseInt(String(show.tmdbId).replace('movie/', ''), 10) : null,
       title: show.title,
       poster_path: show.imageSet?.verticalPoster?.w360
         || show.imageSet?.verticalPoster?.w240

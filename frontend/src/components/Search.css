@@ -61,6 +61,30 @@
   scroll-snap-align: start;
 }
 
+.home-row-skeleton {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.skeleton-card {
+  height: 225px;
+  border-radius: var(--radius);
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.home-row-empty {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  padding: 0.5rem 0;
+}
+
 @media (max-width: 640px) {
   .home-row-card { width: 130px; }
 }

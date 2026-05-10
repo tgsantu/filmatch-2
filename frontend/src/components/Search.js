@@ -12,6 +12,7 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
 
   const [trending, setTrending] = useState([]);
   const [trendingLoading, setTrendingLoading] = useState(true);
+  const [trendingError, setTrendingError] = useState(false);
 
   const [related, setRelated] = useState([]);
 
@@ -19,7 +20,7 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
   useEffect(() => {
     axios.get('/api/home/trending')
       .then(r => setTrending(r.data))
-      .catch(() => {})
+      .catch(() => setTrendingError(true))
       .finally(() => setTrendingLoading(false));
   }, []);
 
@@ -129,6 +130,7 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
             title="Trending Now"
             movies={trending}
             loading={trendingLoading}
+            error={trendingError}
             getMovieStatus={getMovieStatus}
             onAdd={onAdd}
             onRemove={onRemove}
@@ -150,14 +152,16 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
   );
 }
 
-function HomeSection({ title, movies, loading, getMovieStatus, onAdd, onRemove }) {
+function HomeSection({ title, movies, loading, error, getMovieStatus, onAdd, onRemove }) {
   return (
     <section className="home-section">
       <h2 className="home-section-title">{title}</h2>
       {loading ? (
-        <div className="loading" style={{ justifyContent: 'flex-start', padding: '1rem 0' }}>
-          <span className="spinner" />
+        <div className="home-row-skeleton">
+          {[...Array(5)].map((_, i) => <div key={i} className="home-row-card skeleton-card" />)}
         </div>
+      ) : error || movies.length === 0 ? (
+        <p className="home-row-empty">Could not load movies. The server may be waking up — try again in a moment.</p>
       ) : (
         <div className="home-row">
           {movies.map(movie => (

@@ -27,6 +27,14 @@ export default function App() {
   const [library, setLibrary] = useState([]);
   const [settings, setSettings] = useState({ country: 'AR' });
   const [settingsLoaded, setSettingsLoaded] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem('filmatch-theme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('filmatch-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme(t => t === 'dark' ? 'light' : 'dark');
 
   // Auth listener
   useEffect(() => {
@@ -107,7 +115,7 @@ export default function App() {
       <header className="header">
         <div className="header-inner">
           <div className="logo">
-            <img src="/logonotext.png" alt="" className="logo-img" />
+            <img src={theme === 'light' ? '/logonotextlight.png' : '/logonotext.png'} alt="" className="logo-img" />
             <span className="logo-text">FilMatch</span>
           </div>
           <nav className="nav">
@@ -125,6 +133,9 @@ export default function App() {
             ))}
           </nav>
           <div className="user-menu">
+            <button className="theme-toggle" onClick={toggleTheme} title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+              {theme === 'dark' ? '☀' : '☾'}
+            </button>
             <span className="user-email">{user.email || user.displayName}</span>
             <button className="signout-btn" onClick={() => signOut(auth)}>Sign out</button>
           </div>

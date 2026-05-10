@@ -65,7 +65,8 @@
   gap: 0.75rem;
 }
 
-.info-icon { font-size: 1.5rem; flex-shrink: 0; }
+.info-icon { font-size: 1.5rem; flex-shrink: 0; line-height: 1; }
+.tmdb-logo { width: 36px; height: 36px; border-radius: 6px; display: block; }
 .info-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.15rem; }
 .info-desc { font-size: 0.78rem; color: var(--text-muted); line-height: 1.4; }
 

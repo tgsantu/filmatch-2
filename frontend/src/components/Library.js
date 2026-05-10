@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useLanguage } from '../LanguageContext';
 import './Library.css';
@@ -65,12 +65,30 @@ export default function Library({ library, onRemove, onStatusChange, country }) 
 }
 
 function LibraryCard({ movie, onRemove, onStatusChange, country }) {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
   const [streaming, setStreaming] = useState(null);
   const [loadingStream, setLoadingStream] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [showFullOverview, setShowFullOverview] = useState(false);
+  const [freshOverview, setFreshOverview] = useState(null);
+  const [overviewLang, setOverviewLang] = useState(null);
+  const overviewRef = useRef(null);
+  const [isClamped, setIsClamped] = useState(false);
   const genres = Array.isArray(movie.genres) ? movie.genres : [];
+
+  // Fetch fresh TMDB overview in the current language when expanded
+  useEffect(() => {
+    if (!expanded || !movie.tmdb_id || overviewLang === lang) return;
+    axios.get(`/api/movies/${movie.tmdb_id}`, { params: { lang } })
+      .then(r => { setFreshOverview(r.data.overview || null); setOverviewLang(lang); })
+      .catch(() => {});
+  }, [expanded, lang, movie.tmdb_id]); // eslint-disable-line
+
+  // Detect if overview text is actually clamped by CSS
+  useEffect(() => {
+    if (!overviewRef.current || showFullOverview) return;
+    setIsClamped(overviewRef.current.scrollHeight > overviewRef.current.clientHeight);
+  });
 
   const fetchStreaming = async () => {
     if (streaming || !movie.tmdb_id) return;
@@ -89,6 +107,8 @@ function LibraryCard({ movie, onRemove, onStatusChange, country }) {
     if (!expanded) fetchStreaming();
     setExpanded(e => !e);
   };
+
+  const overview = freshOverview !== null ? freshOverview : (movie.overview || '');
 
   return (
     <div className={`lib-card ${expanded ? 'expanded' : ''}`}>
@@ -125,10 +145,10 @@ function LibraryCard({ movie, onRemove, onStatusChange, country }) {
 
       {expanded && (
         <div className="card-detail">
-          {movie.overview && (
+          {overview && (
             <div>
-              <p className={`card-overview ${showFullOverview ? 'full' : ''}`}>{movie.overview}</p>
-              {movie.overview.length > 150 && (
+              <p ref={overviewRef} className={`card-overview ${showFullOverview ? 'full' : ''}`}>{overview}</p>
+              {(isClamped || showFullOverview) && (
                 <button className="read-more-btn" onClick={() => setShowFullOverview(v => !v)}>
                   {showFullOverview ? t.library.readLess : t.library.readMore}
                 </button>

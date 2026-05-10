@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import { useLanguage } from '../LanguageContext';
 import './RecommendationCard.css';
@@ -6,12 +6,30 @@ import './RecommendationCard.css';
 const PLACEHOLDER = 'https://via.placeholder.com/160x240/18181b/71717a?text=No+Poster';
 
 export default function RecommendationCard({ movie, onAdd, country = 'AR' }) {
-  const { t } = useLanguage();
+  const { lang, t } = useLanguage();
   const [streaming, setStreaming] = useState(null);
   const [loadingStream, setLoadingStream] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [added, setAdded] = useState(null);
   const [showFullOverview, setShowFullOverview] = useState(false);
+  const [freshOverview, setFreshOverview] = useState(null);
+  const [overviewLang, setOverviewLang] = useState(null);
+  const overviewRef = useRef(null);
+  const [isClamped, setIsClamped] = useState(false);
+
+  // Fetch fresh TMDB overview in the current language when expanded
+  useEffect(() => {
+    if (!expanded || !movie.tmdb_id || overviewLang === lang) return;
+    axios.get(`/api/movies/${movie.tmdb_id}`, { params: { lang } })
+      .then(r => { setFreshOverview(r.data.overview || null); setOverviewLang(lang); })
+      .catch(() => {});
+  }, [expanded, lang, movie.tmdb_id]); // eslint-disable-line
+
+  // Detect if overview text is actually clamped by CSS
+  useEffect(() => {
+    if (!overviewRef.current || showFullOverview) return;
+    setIsClamped(overviewRef.current.scrollHeight > overviewRef.current.clientHeight);
+  });
 
   const toggle = async () => {
     if (!expanded && movie.tmdb_id && !streaming) {
@@ -34,6 +52,8 @@ export default function RecommendationCard({ movie, onAdd, country = 'AR' }) {
     setAdded(status);
   };
 
+  const overview = freshOverview !== null ? freshOverview : (movie.overview || '');
+
   return (
     <div className={`rec-card ${expanded ? 'expanded' : ''}`}>
       <div onClick={toggle} style={{ cursor: 'pointer', position: 'relative', aspectRatio: '2/3', overflow: 'hidden', background: 'var(--surface2)' }}>
@@ -53,10 +73,10 @@ export default function RecommendationCard({ movie, onAdd, country = 'AR' }) {
 
       {expanded && (
         <div className="card-detail">
-          {movie.overview && (
+          {overview && (
             <div>
-              <p className={`card-overview ${showFullOverview ? 'full' : ''}`}>{movie.overview}</p>
-              {movie.overview.length > 150 && (
+              <p ref={overviewRef} className={`card-overview ${showFullOverview ? 'full' : ''}`}>{overview}</p>
+              {(isClamped || showFullOverview) && (
                 <button className="read-more-btn" onClick={() => setShowFullOverview(v => !v)}>
                   {showFullOverview ? t.recCard.readLess : t.recCard.readMore}
                 </button>

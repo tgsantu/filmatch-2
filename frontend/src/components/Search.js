@@ -16,13 +16,17 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
 
   const [related, setRelated] = useState([]);
 
-  // Fetch trending once on mount
-  useEffect(() => {
+  const fetchTrending = () => {
+    setTrendingLoading(true);
+    setTrendingError(false);
     axios.get('/api/home/trending')
       .then(r => setTrending(r.data))
       .catch(() => setTrendingError(true))
       .finally(() => setTrendingLoading(false));
-  }, []);
+  };
+
+  // Fetch trending once on mount
+  useEffect(() => { fetchTrending(); }, []);
 
   // Fetch "because you watched" when seen list changes
   const seenKey = library
@@ -131,6 +135,7 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
             movies={trending}
             loading={trendingLoading}
             error={trendingError}
+            onRetry={fetchTrending}
             getMovieStatus={getMovieStatus}
             onAdd={onAdd}
             onRemove={onRemove}
@@ -152,7 +157,7 @@ export default function Search({ library, getMovieStatus, onAdd, onRemove }) {
   );
 }
 
-function HomeSection({ title, movies, loading, error, getMovieStatus, onAdd, onRemove }) {
+function HomeSection({ title, movies, loading, error, onRetry, getMovieStatus, onAdd, onRemove }) {
   return (
     <section className="home-section">
       <h2 className="home-section-title">{title}</h2>
@@ -161,7 +166,10 @@ function HomeSection({ title, movies, loading, error, getMovieStatus, onAdd, onR
           {[...Array(5)].map((_, i) => <div key={i} className="home-row-card skeleton-card" />)}
         </div>
       ) : error || movies.length === 0 ? (
-        <p className="home-row-empty">Could not load movies. The server may be waking up — try again in a moment.</p>
+        <div className="home-row-empty">
+          <span>The server is waking up — </span>
+          <button className="home-retry-btn" onClick={onRetry}>try again</button>
+        </div>
       ) : (
         <div className="home-row">
           {movies.map(movie => (

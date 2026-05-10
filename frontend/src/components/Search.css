@@ -85,6 +85,18 @@
   padding: 0.5rem 0;
 }
 
+.home-retry-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
 @media (max-width: 640px) {
   .home-row-card { width: 130px; }
 }

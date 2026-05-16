@@ -39,7 +39,7 @@ export default function Recommendations({ library, onAdd, country }) {
       setUnavailable(withStreaming.filter(m => m.streamingData.platforms.length === 0));
       setGenerated(true);
     } catch (err) {
-      setError(err.response?.data?.error || t.recommendations.failed);
+      setError(t.recommendations.failed);
     } finally {
       setLoading(false);
     }

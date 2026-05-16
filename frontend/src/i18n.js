@@ -103,7 +103,7 @@ const translations = {
       aiAnalyzes: 'La IA analiza tus películas vistas y encuentra films que te van a gustar.',
       noSeenMovies: 'Primero marcá algunas películas como Vistas para obtener recomendaciones.',
       results: (n) => `${n} recomendaciones para vos`,
-      failed: 'No se pudieron generar recomendaciones.',
+      failed: 'No se pudieron generar recomendaciones. Recargá la página e intentá de nuevo.',
     },
     quiz: {
       title: 'Descubrir',
@@ -247,7 +247,7 @@ const translations = {
       aiAnalyzes: "Our AI analyzes your watched movies and finds films you'll love.",
       noSeenMovies: 'Add some movies to your "Seen" list first to get recommendations.',
       results: (n) => `${n} recommendations for you`,
-      failed: 'Failed to generate recommendations.',
+      failed: 'Failed to generate recommendations. Refresh the page and try again.',
     },
     quiz: {
       title: 'Discover',

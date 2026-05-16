@@ -9,6 +9,56 @@ function toTmdbLang(lang) {
   return lang === 'es' ? 'es-ES' : 'en-US';
 }
 
+// Words too generic to identify a franchise
+const GENERIC_WORDS = new Set([
+  'world', 'night', 'story', 'black', 'white', 'blood', 'super', 'under',
+  'first', 'other', 'every', 'never', 'still', 'great', 'comes', 'being',
+  'years', 'today', 'along', 'those', 'which', 'found', 'three', 'place',
+  'might', 'while', 'right', 'begin', 'until', 'later', 'going', 'since',
+  'final', 'force', 'power', 'heart', 'light', 'quest', 'order', 'about',
+  'death', 'after', 'again', 'kings', 'queen', 'house', 'earth', 'falls',
+  'risen', 'parts', 'inner', 'outer', 'above', 'below', 'young', 'older',
+  'night', 'hours', 'days', 'weeks', 'years', 'lives', 'souls', 'ghost',
+]);
+
+function sagaWords(title) {
+  return new Set(
+    title.toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length >= 5 && !GENERIC_WORDS.has(w))
+  );
+}
+
+function sharesSaga(title1, title2) {
+  const words1 = sagaWords(title1);
+  for (const w of sagaWords(title2)) {
+    if (words1.has(w)) return true;
+  }
+  return false;
+}
+
+// Pick up to `count` movies randomly, replacing franchise duplicates with other movies
+function selectDiverseMovies(movies, count = 30) {
+  const shuffled = [...movies].sort(() => Math.random() - 0.5);
+  const selected = [];
+
+  for (const movie of shuffled) {
+    if (selected.length >= count) break;
+    if (!selected.some(s => sharesSaga(s.title, movie.title))) {
+      selected.push(movie);
+    }
+  }
+
+  // Fill remaining slots if the library is small or all from the same franchise
+  for (const movie of shuffled) {
+    if (selected.length >= count) break;
+    if (!selected.some(s => s.tmdb_id === movie.tmdb_id)) selected.push(movie);
+  }
+
+  return selected;
+}
+
 router.post('/', async (req, res) => {
   const { movies, library, lang = 'en' } = req.body;
   if (!movies || movies.length === 0) {
@@ -20,15 +70,39 @@ router.post('/', async (req, res) => {
     ? 'Write the "reason" field in Spanish.'
     : 'Write the "reason" field in English.';
 
-  // Most recent 30: full detail (title + year + genres + overview)
-  // Older movies: title + genres only — keeps token count bounded while preserving taste signal
-  const detailed = movies.slice(0, 30);
-  const compact = movies.slice(30);
+  // 30 franchise-diverse random movies: full detail + director + cast
+  // Remaining movies: title + genre only (still informs AI of breadth)
+  const detailed = selectDiverseMovies(movies, 30);
+  const detailedIds = new Set(detailed.map(m => m.tmdb_id).filter(Boolean));
+  const compact = movies.filter(m => !detailedIds.has(m.tmdb_id));
 
-  const detailedList = detailed.map(m => {
+  // Fetch TMDB credits for the 30 detailed movies in parallel
+  const creditsResults = await Promise.all(
+    detailed.map(m => m.tmdb_id
+      ? axios.get(`${TMDB_BASE}/movie/${m.tmdb_id}/credits`, {
+          params: { api_key: process.env.TMDB_API_KEY },
+        })
+          .then(r => r.data)
+          .catch(() => null)
+      : Promise.resolve(null)
+    )
+  );
+
+  const detailedList = detailed.map((m, i) => {
     const genres = Array.isArray(m.genres) ? m.genres : [];
     const overview = m.overview ? ` — "${m.overview}"` : '';
-    return `"${m.title}" (${m.release_year || 'N/A'}) [${genres.join(', ') || 'Unknown'}]${overview}`;
+    const credits = creditsResults[i];
+    let creditsStr = '';
+    if (credits) {
+      const directors = credits.crew
+        .filter(c => c.job === 'Director')
+        .map(c => c.name)
+        .join(', ');
+      const cast = credits.cast.slice(0, 4).map(c => c.name).join(', ');
+      if (directors) creditsStr += ` — Director: ${directors}`;
+      if (cast) creditsStr += ` — Cast: ${cast}`;
+    }
+    return `"${m.title}" (${m.release_year || 'N/A'}) [${genres.join(', ') || 'Unknown'}]${overview}${creditsStr}`;
   }).join('\n');
 
   const compactList = compact.length > 0

@@ -22,7 +22,7 @@
 }
 
 .filter-btn:hover { background: var(--surface2); color: var(--text); }
-.filter-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.filter-btn.active { background: var(--accent); border-color: var(--accent-ring, var(--accent)); color: var(--accent-fg); }
 
 .filter-count {
   background: rgba(255,255,255,0.15);

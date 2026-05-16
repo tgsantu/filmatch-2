@@ -14,14 +14,14 @@
 }
 
 .header-inner {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 0.25rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 64px;
-  gap: 2rem;
+  gap: 0.5rem;
 }
 
 .logo {
@@ -35,26 +35,27 @@
 .logo-img { height: 48px; width: auto; display: block; }
 .logo-icon { font-size: 1.5rem; }
 .logo-text {
-  font-size: 1.4rem;
-  font-weight: 700;
+  font-family: 'Nekta', serif;
+  font-size: 56px;
+  font-weight: normal;
   color: var(--accent);
   letter-spacing: -0.02em;
 }
 
 .nav {
   display: flex;
-  gap: 0.25rem;
+  gap: 2px;
   align-items: center;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .nav-btn {
   background: none;
   border: none;
   color: var(--text-muted);
-  font-size: 0.875rem;
+  font-size: 16px;
   font-weight: 500;
-  padding: 0.5rem 0.875rem;
+  padding: 6px 7px;
   border-radius: var(--radius);
   cursor: pointer;
   transition: all 0.15s;
@@ -66,7 +67,7 @@
 }
 
 .nav-btn:hover { background: var(--surface2); color: var(--text); }
-.nav-btn.active { background: var(--accent); color: #fff; }
+.nav-btn.active { background: var(--accent); color: var(--accent-fg); border: 2px solid var(--accent-ring); }
 
 .badge {
   background: rgba(255,255,255,0.25);
@@ -161,7 +162,7 @@
   transition: all 0.15s;
 }
 
-.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary { background: var(--accent); color: var(--accent-fg); border: 2px solid var(--accent-ring); }
 .btn-primary:hover { background: var(--accent-hover); }
 .btn-secondary { background: var(--surface2); color: var(--text); }
 .btn-secondary:hover { background: var(--border); }
@@ -255,7 +256,7 @@
 
 .lang-toggle button.active {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-fg);
 }
 
 .lang-toggle button:not(.active):hover {
@@ -279,7 +280,7 @@
   }
   .header-inner .nav { display: none; }
   .logo-img { height: 30px; }
-  .logo-text { font-size: 1rem; }
+  .logo-text { font-size: 32px; }
   .user-email { display: none; }
   .signout-btn { display: none; }
   .user-menu { gap: 0.45rem; }
@@ -293,7 +294,7 @@
   }
   .section-title { font-size: 1.2rem; margin-bottom: 1rem; }
   .section-subtitle { font-size: 0.82rem; margin-bottom: 1rem; }
-  .grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0.75rem; }
+  .grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
   .empty-state { padding: 3rem 1rem; }
 
   /* ── Floating pill bottom navigation ── */

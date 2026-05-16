@@ -48,7 +48,7 @@
 
 .auth-lang button.active {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-fg);
 }
 
 .auth-lang button:not(.active):hover {
@@ -151,7 +151,8 @@
 
 .auth-submit {
   background: var(--accent);
-  color: #fff;
+  color: var(--accent-fg);
+  border: 2px solid var(--accent-ring);
   border: none;
   border-radius: var(--radius);
   font-family: inherit;

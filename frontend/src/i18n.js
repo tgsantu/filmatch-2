@@ -64,8 +64,8 @@ const translations = {
       noStreaming: 'No disponible en tu región',
       readMore: 'Leer más',
       readLess: 'Leer menos',
-      statusSeen: '✓ Vista',
-      statusWatchlist: '★ Pendiente',
+      statusSeen: 'Vista',
+      statusWatchlist: 'Pendiente',
     },
     card: {
       more: 'Más',
@@ -209,8 +209,8 @@ const translations = {
       noStreaming: 'Not available in your region',
       readMore: 'Read more',
       readLess: 'Read less',
-      statusSeen: '✓ Seen',
-      statusWatchlist: '★ Watchlist',
+      statusSeen: 'Seen',
+      statusWatchlist: 'Watchlist',
     },
     card: {
       more: 'More',

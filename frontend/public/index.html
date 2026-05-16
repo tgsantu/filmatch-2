@@ -12,9 +12,20 @@
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logonotext.png" />
     <title>theFilMatch</title>
     <script>(function(){var t=localStorage.getItem('filmatch-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      @font-face {
+        font-family: 'Nekta';
+        src: url('%PUBLIC_URL%/fonts/Nekta-Demo-BF69f18115621a7.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'YoungSerif';
+        src: url('%PUBLIC_URL%/fonts/YoungSerif-Regular.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

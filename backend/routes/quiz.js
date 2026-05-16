@@ -9,8 +9,8 @@ const TMDB_BASE = 'https://api.themoviedb.org/3';
 const SEED_QUESTIONS = {
   es: [
     {
-      question: '¿Cuál es tu estado de ánimo ahora mismo?',
-      options: ['Quiero reír', 'Necesito algo intenso', 'Quiero pasar miedo', 'Quiero inspirarme'],
+      question: '¿Qué querés sacar de la peli de esta noche?',
+      options: ['Entretenimiento puro', 'Que me sorprenda', 'Que me haga pensar', 'Olvidarme de todo por 2 horas'],
     },
     {
       question: '¿Qué género te está pidiendo el cuerpo esta noche?',
@@ -19,8 +19,8 @@ const SEED_QUESTIONS = {
   ],
   en: [
     {
-      question: "What's your mood right now?",
-      options: ['I want to laugh', 'I need something intense', 'I want to be scared', 'I want to feel inspired'],
+      question: "What do you want to get out of tonight's movie?",
+      options: ['To be entertained', 'To be surprised', 'To think about it after', 'To forget everything for 2 hours'],
     },
     {
       question: 'Which genre are you feeling tonight?',

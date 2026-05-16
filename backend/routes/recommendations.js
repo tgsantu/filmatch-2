@@ -2,7 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const router = express.Router();
 
-const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 
 function toTmdbLang(lang) {
@@ -120,14 +120,23 @@ router.post('/', async (req, res) => {
 
   const prompt = `Based on these movies the user has watched:\n${movieList}${excludeList}\n\nRecommend exactly 9 different movies they haven't seen yet and are not in the list above. ${langInstruction} Return ONLY a JSON array with this exact structure, no extra text:\n[\n  {\n    "title": "Movie Title",\n    "year": 2020,\n    "reason": "Short reason why they'd like it based on their taste"\n  }\n]`;
 
+  const geminiPayload = {
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { temperature: 0.7, maxOutputTokens: 1000, thinkingConfig: { thinkingBudget: 0 } },
+  };
+  const callGemini = () => axios.post(`${GEMINI_BASE}?key=${process.env.GEMINI_API_KEY}`, geminiPayload);
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
   try {
-    const geminiRes = await axios.post(
-      `${GEMINI_BASE}?key=${process.env.GEMINI_API_KEY}`,
-      {
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1000, thinkingConfig: { thinkingBudget: 0 } },
-      }
-    );
+    let geminiRes;
+    try {
+      geminiRes = await callGemini();
+    } catch (e) {
+      if (e.response?.status === 429) {
+        await sleep(4000);
+        geminiRes = await callGemini();
+      } else throw e;
+    }
 
     const parts = geminiRes.data.candidates[0].content.parts;
     const content = (parts.find(p => !p.thought) || parts[parts.length - 1]).text.trim();

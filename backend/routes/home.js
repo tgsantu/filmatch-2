@@ -29,50 +29,63 @@ function formatMovie(m) {
   };
 }
 
+async function trendingFromRapidApi(country, outputLang) {
+  const r = await axios.get('https://streaming-availability.p.rapidapi.com/shows/search/filters', {
+    headers: {
+      'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+      'x-rapidapi-host': 'streaming-availability.p.rapidapi.com',
+    },
+    params: { country: country.toLowerCase(), show_type: 'movie', order_by: 'popularity_1year', output_language: outputLang },
+  });
+  return (r.data.shows || []).slice(0, 20).map(show => ({
+    tmdb_id: show.tmdbId ? parseInt(String(show.tmdbId).replace('movie/', ''), 10) : null,
+    title: show.title,
+    poster_path: show.imageSet?.verticalPoster?.w360 || show.imageSet?.verticalPoster?.w240 || null,
+    release_year: show.releaseYear ? String(show.releaseYear) : null,
+    overview: show.overview || '',
+    genres: (show.genres || []).map(g => g.name).filter(Boolean),
+  }));
+}
+
+async function trendingFromTmdb(country, tmdbLang) {
+  const [page1, page2] = await Promise.all([
+    axios.get(`${TMDB_BASE}/trending/movie/week`, { params: { api_key: process.env.TMDB_API_KEY, language: tmdbLang, page: 1 } }),
+    axios.get(`${TMDB_BASE}/trending/movie/week`, { params: { api_key: process.env.TMDB_API_KEY, language: tmdbLang, page: 2 } }),
+  ]);
+  const candidates = [...(page1.data.results || []), ...(page2.data.results || [])];
+  const withProviders = await Promise.all(
+    candidates.map(async m => {
+      try {
+        const r = await axios.get(`${TMDB_BASE}/movie/${m.id}/watch/providers`, { params: { api_key: process.env.TMDB_API_KEY } });
+        const countryData = (r.data.results || {})[country.toUpperCase()];
+        if (!countryData) return null;
+        const hasSubscription = (countryData.flatrate?.length > 0) || (countryData.free?.length > 0) || (countryData.ads?.length > 0);
+        const hasRentBuy = (countryData.rent?.length > 0) || (countryData.buy?.length > 0);
+        if (!hasSubscription && !hasRentBuy) return null;
+        return { movie: m, hasSubscription };
+      } catch { return null; }
+    })
+  );
+  return withProviders
+    .filter(Boolean)
+    .sort((a, b) => b.hasSubscription - a.hasSubscription)
+    .slice(0, 20)
+    .map(({ movie }) => formatMovie(movie));
+}
+
 router.get('/trending', async (req, res) => {
-  const country = (req.query.country || 'US').toUpperCase();
+  const country = req.query.country || 'US';
   const lang = req.query.lang || 'en';
   const tmdbLang = toTmdbLang(lang);
+  const outputLang = lang === 'es' ? 'es' : 'en';
 
   try {
-    // Fetch 2 pages of trending to have enough after filtering
-    const [page1, page2] = await Promise.all([
-      axios.get(`${TMDB_BASE}/trending/movie/week`, { params: { api_key: process.env.TMDB_API_KEY, language: tmdbLang, page: 1 } }),
-      axios.get(`${TMDB_BASE}/trending/movie/week`, { params: { api_key: process.env.TMDB_API_KEY, language: tmdbLang, page: 2 } }),
-    ]);
-
-    const candidates = [
-      ...(page1.data.results || []),
-      ...(page2.data.results || []),
-    ];
-
-    // Check watch providers for all candidates in parallel
-    const withProviders = await Promise.all(
-      candidates.map(async m => {
-        try {
-          const r = await axios.get(`${TMDB_BASE}/movie/${m.id}/watch/providers`, {
-            params: { api_key: process.env.TMDB_API_KEY },
-          });
-          const countryData = (r.data.results || {})[country];
-          const available = countryData && (
-            (countryData.flatrate?.length > 0) ||
-            (countryData.rent?.length > 0) ||
-            (countryData.buy?.length > 0) ||
-            (countryData.free?.length > 0) ||
-            (countryData.ads?.length > 0)
-          );
-          return available ? m : null;
-        } catch {
-          return null;
-        }
-      })
-    );
-
-    const movies = withProviders
-      .filter(Boolean)
-      .slice(0, 20)
-      .map(formatMovie);
-
+    let movies;
+    try {
+      movies = await trendingFromRapidApi(country, outputLang);
+    } catch {
+      movies = await trendingFromTmdb(country, tmdbLang);
+    }
     res.json(movies);
   } catch (err) {
     console.error('[trending] error:', err.response?.data || err.message);

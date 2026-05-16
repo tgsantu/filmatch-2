@@ -28,6 +28,7 @@ router.get('/:tmdbId', async (req, res) => {
     if (err.response?.status === 404) {
       return res.json({ tmdb_id: req.params.tmdbId, country: country.toUpperCase(), platforms: [] });
     }
+    console.error('[streaming] error:', err.response?.data || err.message);
     res.status(502).json({ error: 'Failed to fetch streaming info', detail: err.message });
   }
 });

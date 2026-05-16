@@ -28,10 +28,43 @@ router.get('/search', async (req, res) => {
 
   try {
     await loadGenres(tmdbLang);
-    const response = await axios.get(`${TMDB_BASE}/search/movie`, {
-      params: { api_key: process.env.TMDB_API_KEY, query, language: tmdbLang, page: 1 },
-    });
-    res.json(response.data.results.map(m => formatMovie(m, genreMaps[tmdbLang])));
+    const params = { api_key: process.env.TMDB_API_KEY, language: tmdbLang, page: 1 };
+
+    const [movieRes, personRes] = await Promise.allSettled([
+      axios.get(`${TMDB_BASE}/search/movie`, { params: { ...params, query } }),
+      axios.get(`${TMDB_BASE}/search/person`, { params: { ...params, query } }),
+    ]);
+
+    const movieResults = movieRes.status === 'fulfilled'
+      ? movieRes.value.data.results.map(m => formatMovie(m, genreMaps[tmdbLang]))
+      : [];
+
+    const seenIds = new Set(movieResults.map(m => m.tmdb_id));
+    let personMovies = [];
+
+    if (personRes.status === 'fulfilled') {
+      const persons = personRes.value.data.results.slice(0, 2);
+      const creditArrays = await Promise.all(persons.map(p =>
+        axios.get(`${TMDB_BASE}/person/${p.id}/movie_credits`, { params })
+          .then(r => [...(r.data.cast || []), ...(r.data.crew || [])])
+          .catch(() => [])
+      ));
+
+      for (const credits of creditArrays) {
+        credits
+          .filter(m => m.id && !seenIds.has(m.id) && m.title)
+          .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
+          .slice(0, 12)
+          .forEach(m => {
+            if (!seenIds.has(m.id)) {
+              seenIds.add(m.id);
+              personMovies.push(formatMovie(m, genreMaps[tmdbLang]));
+            }
+          });
+      }
+    }
+
+    res.json([...movieResults, ...personMovies]);
   } catch (err) {
     res.status(502).json({ error: 'Failed to fetch from TMDB', detail: err.message });
   }

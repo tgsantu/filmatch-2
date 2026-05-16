@@ -125,11 +125,12 @@ router.post('/', async (req, res) => {
       `${GEMINI_BASE}?key=${process.env.GEMINI_API_KEY}`,
       {
         contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { temperature: 0.7, maxOutputTokens: 1000 },
+        generationConfig: { temperature: 0.7, maxOutputTokens: 1000, thinkingConfig: { thinkingBudget: 0 } },
       }
     );
 
-    const content = geminiRes.data.candidates[0].content.parts[0].text.trim();
+    const parts = geminiRes.data.candidates[0].content.parts;
+    const content = (parts.find(p => !p.thought) || parts[parts.length - 1]).text.trim();
     const jsonMatch = content.match(/\[[\s\S]*\]/);
     if (!jsonMatch) throw new Error('Invalid response format from AI');
     const recs = JSON.parse(jsonMatch[0]);

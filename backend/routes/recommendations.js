@@ -118,11 +118,12 @@ router.post('/', async (req, res) => {
     ? `\n\nDo NOT recommend any of these movies (already in the user's list):\n${library.map(m => `"${m.title}"`).join(', ')}`
     : '';
 
-  const prompt = `Based on these movies the user has watched:\n${movieList}${excludeList}\n\nRecommend exactly 9 different movies they haven't seen yet and are not in the list above. ${langInstruction} Return ONLY a JSON array with this exact structure, no extra text:\n[\n  {\n    "title": "Movie Title",\n    "year": 2020,\n    "reason": "Short reason why they'd like it based on their taste"\n  }\n]`;
+  const seed = Math.floor(Math.random() * 99999);
+  const prompt = `Based on these movies the user has watched:\n${movieList}${excludeList}\n\nRecommend exactly 9 different movies they haven't seen yet and are not in the list above. Each time you are called, vary your picks — explore different genres, decades, countries, and mix mainstream with hidden gems. Seed: ${seed}. ${langInstruction} Return ONLY a JSON array with this exact structure, no extra text:\n[\n  {\n    "title": "Movie Title",\n    "year": 2020,\n    "reason": "Short reason why they'd like it based on their taste"\n  }\n]`;
 
   const geminiPayload = {
     contents: [{ parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.7, maxOutputTokens: 1000, thinkingConfig: { thinkingBudget: 0 } },
+    generationConfig: { temperature: 0.9, maxOutputTokens: 1000, thinkingConfig: { thinkingBudget: 0 } },
   };
   const callGemini = () => axios.post(`${GEMINI_BASE}?key=${process.env.GEMINI_API_KEY}`, geminiPayload);
   const sleep = ms => new Promise(r => setTimeout(r, ms));

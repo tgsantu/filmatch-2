@@ -43,18 +43,28 @@ router.get('/search', async (req, res) => {
     let personMovies = [];
 
     if (personRes.status === 'fulfilled') {
-      const persons = personRes.value.data.results.slice(0, 2);
+      const persons = (personRes.value.data.results || []).slice(0, 2);
+      console.log(`[search] "${query}" → ${persons.length} people found: ${persons.map(p => p.name).join(', ')}`);
+
       const creditArrays = await Promise.all(persons.map(p =>
-        axios.get(`${TMDB_BASE}/person/${p.id}/movie_credits`, { params })
-          .then(r => [...(r.data.cast || []), ...(r.data.crew || [])])
+        axios.get(`${TMDB_BASE}/person/${p.id}/movie_credits`, {
+          params: { api_key: process.env.TMDB_API_KEY, language: tmdbLang },
+        })
+          .then(r => {
+            const deduped = new Map();
+            [...(r.data.cast || []), ...(r.data.crew || [])].forEach(m => {
+              if (m.id && m.title && !deduped.has(m.id)) deduped.set(m.id, m);
+            });
+            return [...deduped.values()];
+          })
           .catch(() => [])
       ));
 
       for (const credits of creditArrays) {
         credits
-          .filter(m => m.id && !seenIds.has(m.id) && m.title)
+          .filter(m => !seenIds.has(m.id))
           .sort((a, b) => (b.popularity || 0) - (a.popularity || 0))
-          .slice(0, 12)
+          .slice(0, 15)
           .forEach(m => {
             if (!seenIds.has(m.id)) {
               seenIds.add(m.id);
@@ -62,6 +72,8 @@ router.get('/search', async (req, res) => {
             }
           });
       }
+    } else {
+      console.log(`[search] person search failed: ${personRes.reason?.message}`);
     }
 
     res.json([...movieResults, ...personMovies]);

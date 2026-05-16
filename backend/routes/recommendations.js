@@ -155,6 +155,7 @@ router.post('/', async (req, res) => {
 
     res.json(enriched);
   } catch (err) {
+    console.error('[recommendations] error:', err.response?.data || err.message);
     res.status(502).json({ error: 'Failed to generate recommendations', detail: err.message });
   }
 });

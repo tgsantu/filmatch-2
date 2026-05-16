@@ -3,7 +3,7 @@ const axios = require('axios');
 const db = require('../database');
 const router = express.Router();
 
-const GROQ_BASE = 'https://api.groq.com/openai/v1/chat/completions';
+const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 
 const SEED_QUESTIONS = {
@@ -83,16 +83,15 @@ Format 2 — final recommendations (exactly 6 movies):
 }`;
 
   try {
-    const groqRes = await axios.post(GROQ_BASE, {
-      model: 'llama-3.3-70b-versatile',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.85,
-      max_tokens: 700,
-    }, {
-      headers: { Authorization: `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
-    });
+    const geminiRes = await axios.post(
+      `${GEMINI_BASE}?key=${process.env.GEMINI_API_KEY}`,
+      {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.85, maxOutputTokens: 700 },
+      }
+    );
 
-    const content = groqRes.data.choices[0].message.content.trim();
+    const content = geminiRes.data.candidates[0].content.parts[0].text.trim();
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('Invalid AI response format');
     const parsed = JSON.parse(jsonMatch[0]);

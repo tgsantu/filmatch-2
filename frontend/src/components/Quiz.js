@@ -77,7 +77,8 @@ export default function Quiz({ onAdd, country }) {
         setCurrent(res.data);
       }
     } catch (err) {
-      setError(err.response?.data?.error || t.quiz.failed);
+      const isHighDemand = err.response?.data?.error === 'high_demand';
+      setError(isHighDemand ? t.quiz.highDemand : t.quiz.failed);
     } finally {
       setLoadingNext(false);
     }
@@ -98,6 +99,7 @@ export default function Quiz({ onAdd, country }) {
           <button className="btn btn-primary quiz-start-btn" onClick={start} disabled={seeds.length === 0}>
             {t.quiz.startQuiz}
           </button>
+          <p className="ai-disclaimer">{t.quiz.aiDisclaimer}</p>
         </div>
       </div>
     );

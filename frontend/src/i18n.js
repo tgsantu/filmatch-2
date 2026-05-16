@@ -105,6 +105,8 @@ const translations = {
       noSeenMovies: 'Primero marcá algunas películas como Vistas para obtener recomendaciones.',
       results: (n) => `${n} recomendaciones para vos`,
       failed: 'No se pudieron generar recomendaciones. Recargá la página e intentá de nuevo.',
+      highDemand: 'Nuestro proveedor de IA está con mucha demanda ahora mismo. Esperá unos segundos e intentá de nuevo.',
+      aiDisclaimer: 'Usamos un modelo de IA económico para que la app sea gratis.',
     },
     quiz: {
       title: 'Descubrir',
@@ -122,6 +124,8 @@ const translations = {
       question: (n) => `Pregunta ${n}`,
       thinking: 'Pensando la próxima pregunta...',
       failed: 'No se pudo cargar el quiz.',
+      highDemand: 'Nuestro proveedor de IA está con mucha demanda ahora mismo. Esperá unos segundos e intentá de nuevo.',
+      aiDisclaimer: 'Usamos un modelo de IA económico para que la app sea gratis.',
     },
     settings: {
       title: 'Ajustes',
@@ -250,6 +254,8 @@ const translations = {
       noSeenMovies: 'Add some movies to your "Seen" list first to get recommendations.',
       results: (n) => `${n} recommendations for you`,
       failed: 'Failed to generate recommendations. Refresh the page and try again.',
+      highDemand: 'Our AI provider is experiencing high demand right now. Wait a few seconds and try again.',
+      aiDisclaimer: 'We use a budget AI model to keep FilMatch free.',
     },
     quiz: {
       title: 'Discover',
@@ -267,6 +273,8 @@ const translations = {
       question: (n) => `Question ${n}`,
       thinking: 'Thinking of the next question...',
       failed: 'Failed to load quiz.',
+      highDemand: 'Our AI provider is experiencing high demand right now. Wait a few seconds and try again.',
+      aiDisclaimer: 'We use a budget AI model to keep FilMatch free.',
     },
     settings: {
       title: 'Settings',

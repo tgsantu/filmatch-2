@@ -39,7 +39,8 @@ export default function Recommendations({ library, onAdd, country }) {
       setUnavailable(withStreaming.filter(m => m.streamingData.platforms.length === 0));
       setGenerated(true);
     } catch (err) {
-      setError(t.recommendations.failed);
+      const isHighDemand = err.response?.data?.error === 'high_demand';
+      setError(isHighDemand ? t.recommendations.highDemand : t.recommendations.failed);
     } finally {
       setLoading(false);
     }
@@ -58,6 +59,7 @@ export default function Recommendations({ library, onAdd, country }) {
           <p>{t.recommendations.aiAnalyzes}</p>
           {error && <div className="error-msg" style={{ textAlign: 'left', width: '100%', maxWidth: 400 }}>{error}</div>}
           <button className="btn btn-primary rec-btn" onClick={generate}>{t.recommendations.generate}</button>
+          <p className="ai-disclaimer">{t.recommendations.aiDisclaimer}</p>
         </div>
       )}
 

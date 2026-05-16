@@ -11,6 +11,7 @@
 .rec-prompt h2 { font-size: 1.4rem; font-weight: 700; }
 .rec-prompt p { color: var(--text-muted); max-width: 400px; font-size: 0.9rem; }
 .rec-btn { padding: 0.75rem 2rem; font-size: 1rem; margin-top: 0.5rem; }
+.ai-disclaimer { font-size: 0.7rem; color: var(--text-muted); opacity: 0.6; margin-top: -0.25rem; }
 
 .rec-header {
   display: flex;

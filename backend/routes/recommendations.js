@@ -135,7 +135,14 @@ router.post('/', async (req, res) => {
     } catch (e) {
       if (e.response?.status === 429) {
         await sleep(4000);
-        geminiRes = await callGemini();
+        try {
+          geminiRes = await callGemini();
+        } catch (e2) {
+          if (e2.response?.status === 429) {
+            return res.status(503).json({ error: 'high_demand' });
+          }
+          throw e2;
+        }
       } else throw e;
     }
 

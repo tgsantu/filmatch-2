@@ -91,7 +91,12 @@ Format 2 — final recommendations (exactly 6 movies):
       }
     );
 
-    const parts = geminiRes.data.candidates[0].content.parts;
+    const candidate = geminiRes.data.candidates?.[0];
+    if (!candidate?.content?.parts) {
+      console.error('[quiz] blocked or empty response:', JSON.stringify(geminiRes.data));
+      throw new Error('Empty or blocked response from AI');
+    }
+    const parts = candidate.content.parts;
     const content = (parts.find(p => !p.thought) || parts[parts.length - 1]).text.trim();
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error('Invalid AI response format');
@@ -126,6 +131,7 @@ Format 2 — final recommendations (exactly 6 movies):
 
     throw new Error('Unexpected response structure');
   } catch (err) {
+    console.error('[quiz] error:', err.response?.data || err.message);
     res.status(502).json({ error: 'Failed to generate next question', detail: err.message });
   }
 });

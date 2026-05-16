@@ -118,8 +118,21 @@ router.post('/', async (req, res) => {
     ? `\n\nDo NOT recommend any of these movies (already in the user's list):\n${library.map(m => `"${m.title}"`).join(', ')}`
     : '';
 
-  const seed = Math.floor(Math.random() * 99999);
-  const prompt = `Based on these movies the user has watched:\n${movieList}${excludeList}\n\nRecommend exactly 9 different movies they haven't seen yet and are not in the list above. Each time you are called, vary your picks — explore different genres, decades, countries, and mix mainstream with hidden gems. Seed: ${seed}. ${langInstruction} Return ONLY a JSON array with this exact structure, no extra text:\n[\n  {\n    "title": "Movie Title",\n    "year": 2020,\n    "reason": "Short reason why they'd like it based on their taste"\n  }\n]`;
+  const angles = [
+    'Focus on hidden gems and underrated films — avoid the most obvious mainstream picks.',
+    'Focus on films from the last 5 years — recent releases the user probably hasn\'t discovered yet.',
+    'Focus on international films (non-English) — world cinema that matches their taste.',
+    'Focus on cult classics and films with a devoted following.',
+    'Focus on films from the 1970s, 1980s or 1990s — older gems they might have missed.',
+    'Focus on critically acclaimed films that flew under the radar commercially.',
+    'Focus on films from directors or actors similar to those in their watched list.',
+    'Focus on a mix of different genres — push the user outside their usual comfort zone.',
+    'Focus on films with an unexpected twist or unique narrative structure.',
+    'Focus on smaller, independent productions rather than big studio films.',
+  ];
+  const angle = angles[Math.floor(Math.random() * angles.length)];
+
+  const prompt = `Based on these movies the user has watched:\n${movieList}${excludeList}\n\nRecommend exactly 9 different movies they haven't seen yet and are not in the list above.\n\nAngle for this session: ${angle}\n\n${langInstruction} Return ONLY a JSON array with this exact structure, no extra text:\n[\n  {\n    "title": "Movie Title",\n    "year": 2020,\n    "reason": "Short reason why they'd like it based on their taste"\n  }\n]`;
 
   const geminiPayload = {
     contents: [{ parts: [{ text: prompt }] }],

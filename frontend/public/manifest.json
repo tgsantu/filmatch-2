@@ -4,8 +4,8 @@
   "description": "Your personal movie tracker with AI-powered recommendations",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0d0d0f",
-  "theme_color": "#fe6011",
+  "background_color": "#132A13",
+  "theme_color": "#132A13",
   "orientation": "portrait",
   "icons": [
     {

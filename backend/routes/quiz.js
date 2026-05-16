@@ -3,7 +3,7 @@ const axios = require('axios');
 const db = require('../database');
 const router = express.Router();
 
-const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent';
+const GEMINI_BASE = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 
 const SEED_QUESTIONS = {

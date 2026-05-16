@@ -11,7 +11,8 @@ export default function Quiz({ onAdd, country }) {
   const [history, setHistory] = useState([]);
   const [current, setCurrent] = useState(null);
   const [seedIndex, setSeedIndex] = useState(0);
-  const [results, setResults] = useState([]);
+  const [streamable, setStreamable] = useState([]);
+  const [unavailable, setUnavailable] = useState([]);
   const [error, setError] = useState('');
   const [loadingNext, setLoadingNext] = useState(false);
 
@@ -34,7 +35,8 @@ export default function Quiz({ onAdd, country }) {
     setHistory([]);
     setSeedIndex(0);
     setCurrent(null);
-    setResults([]);
+    setStreamable([]);
+    setUnavailable([]);
     setError('');
     setStep('intro');
   };
@@ -58,7 +60,18 @@ export default function Quiz({ onAdd, country }) {
     try {
       const res = await axios.post('/api/quiz/next', { history: newHistory, lang });
       if (res.data.done) {
-        setResults(res.data.recommendations);
+        const recs = res.data.recommendations;
+        const streamingResults = await Promise.all(
+          recs.map(m => m.tmdb_id
+            ? axios.get(`/api/streaming/${m.tmdb_id}?country=${country}`)
+                .then(r => r.data)
+                .catch(() => ({ platforms: [] }))
+            : Promise.resolve({ platforms: [] })
+          )
+        );
+        const withStreaming = recs.map((m, i) => ({ ...m, streamingData: streamingResults[i] }));
+        setStreamable(withStreaming.filter(m => m.streamingData.platforms.length > 0));
+        setUnavailable(withStreaming.filter(m => m.streamingData.platforms.length === 0));
         setStep('results');
       } else {
         setCurrent(res.data);
@@ -99,10 +112,20 @@ export default function Quiz({ onAdd, country }) {
         </div>
         <p className="section-subtitle">{t.quiz.basedOn(history.length)}</p>
         <div className="grid">
-          {results.map((movie, i) => (
-            <RecommendationCard key={i} movie={movie} onAdd={onAdd} country={country} />
+          {streamable.map((movie, i) => (
+            <RecommendationCard key={i} movie={movie} onAdd={onAdd} country={country} preloadedStreaming={movie.streamingData} />
           ))}
         </div>
+        {unavailable.length > 0 && (
+          <div className="rec-unavailable">
+            <p className="rec-section-label">{t.common.notStreamableSection}</p>
+            <div className="grid">
+              {unavailable.map((movie, i) => (
+                <RecommendationCard key={i} movie={movie} onAdd={onAdd} country={country} preloadedStreaming={movie.streamingData} />
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     );
   }

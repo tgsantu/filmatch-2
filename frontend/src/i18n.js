@@ -139,6 +139,7 @@ const translations = {
     },
     common: {
       signOut: 'Cerrar sesión',
+      notStreamableSection: 'No disponible en streaming',
     },
   },
 
@@ -282,6 +283,7 @@ const translations = {
     },
     common: {
       signOut: 'Sign out',
+      notStreamableSection: 'Not available to stream',
     },
   },
 };

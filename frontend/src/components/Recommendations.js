@@ -6,7 +6,8 @@ import './Recommendations.css';
 
 export default function Recommendations({ library, onAdd, country }) {
   const { lang, t } = useLanguage();
-  const [recs, setRecs] = useState([]);
+  const [streamable, setStreamable] = useState([]);
+  const [unavailable, setUnavailable] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [generated, setGenerated] = useState(false);
@@ -22,7 +23,20 @@ export default function Recommendations({ library, onAdd, country }) {
     try {
       const res = await axios.post('/api/recommendations', { movies: seenMovies, library, lang });
       const libraryIds = new Set(library.map(m => m.tmdb_id));
-      setRecs(res.data.filter(m => !libraryIds.has(m.tmdb_id)));
+      const recs = res.data.filter(m => !libraryIds.has(m.tmdb_id));
+
+      const streamingResults = await Promise.all(
+        recs.map(m => m.tmdb_id
+          ? axios.get(`/api/streaming/${m.tmdb_id}?country=${country}`)
+              .then(r => r.data)
+              .catch(() => ({ platforms: [] }))
+          : Promise.resolve({ platforms: [] })
+        )
+      );
+
+      const withStreaming = recs.map((m, i) => ({ ...m, streamingData: streamingResults[i] }));
+      setStreamable(withStreaming.filter(m => m.streamingData.platforms.length > 0));
+      setUnavailable(withStreaming.filter(m => m.streamingData.platforms.length === 0));
       setGenerated(true);
     } catch (err) {
       setError(err.response?.data?.error || t.recommendations.failed);
@@ -55,15 +69,25 @@ export default function Recommendations({ library, onAdd, country }) {
       {!loading && generated && (
         <>
           <div className="rec-header">
-            <p className="results-count">{t.recommendations.results(recs.length)}</p>
+            <p className="results-count">{t.recommendations.results(streamable.length + unavailable.length)}</p>
             <button className="btn btn-ghost" onClick={generate} disabled={loading}>{t.recommendations.refresh}</button>
           </div>
           {error && <div className="error-msg">{error}</div>}
           <div className="grid">
-            {recs.map((movie, i) => (
-              <RecommendationCard key={i} movie={movie} onAdd={onAdd} country={country} />
+            {streamable.map((movie, i) => (
+              <RecommendationCard key={i} movie={movie} onAdd={onAdd} country={country} preloadedStreaming={movie.streamingData} />
             ))}
           </div>
+          {unavailable.length > 0 && (
+            <div className="rec-unavailable">
+              <p className="rec-section-label">{t.common.notStreamableSection}</p>
+              <div className="grid">
+                {unavailable.map((movie, i) => (
+                  <RecommendationCard key={i} movie={movie} onAdd={onAdd} country={country} preloadedStreaming={movie.streamingData} />
+                ))}
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

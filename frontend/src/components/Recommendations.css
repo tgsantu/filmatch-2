@@ -21,6 +21,21 @@
 
 .results-count { font-size: 0.85rem; color: var(--text-muted); }
 
+.rec-unavailable {
+  margin-top: 2.5rem;
+}
+
+.rec-section-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
 @media (max-width: 640px) {
   .rec-prompt { padding: 2.5rem 1rem; }
   .rec-prompt h2 { font-size: 1.2rem; }

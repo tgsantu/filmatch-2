@@ -5,9 +5,9 @@ import './RecommendationCard.css';
 
 const PLACEHOLDER = 'https://via.placeholder.com/160x240/18181b/71717a?text=No+Poster';
 
-export default function RecommendationCard({ movie, onAdd, country = 'AR' }) {
+export default function RecommendationCard({ movie, onAdd, country = 'AR', preloadedStreaming = null }) {
   const { lang, t } = useLanguage();
-  const [streaming, setStreaming] = useState(null);
+  const [streaming, setStreaming] = useState(preloadedStreaming);
   const [loadingStream, setLoadingStream] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [added, setAdded] = useState(null);

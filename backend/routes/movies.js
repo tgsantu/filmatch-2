@@ -42,6 +42,24 @@ router.get('/search', async (req, res) => {
     const seenIds = new Set(movieResults.map(m => m.tmdb_id));
     let personMovies = [];
 
+    // Genre search — check if query matches a known genre name
+    const genreMap = genreMaps[tmdbLang] || {};
+    const queryLower = query.trim().toLowerCase();
+    const matchedGenreId = Object.entries(genreMap).find(([, name]) => name.toLowerCase() === queryLower)?.[0];
+    if (matchedGenreId) {
+      try {
+        const genreRes = await axios.get(`${TMDB_BASE}/discover/movie`, {
+          params: { api_key: process.env.TMDB_API_KEY, language: tmdbLang, with_genres: matchedGenreId, sort_by: 'popularity.desc', page: 1 },
+        });
+        (genreRes.data.results || []).forEach(m => {
+          if (!seenIds.has(m.id)) {
+            seenIds.add(m.id);
+            movieResults.push(formatMovie(m, genreMap));
+          }
+        });
+      } catch {}
+    }
+
     if (personRes.status === 'fulfilled') {
       const persons = (personRes.value.data.results || []).slice(0, 2);
       console.log(`[search] "${query}" → ${persons.length} people found: ${persons.map(p => p.name).join(', ')}`);

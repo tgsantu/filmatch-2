@@ -39,7 +39,7 @@ const translations = {
       getStarted: '¡Empezar! →',
     },
     home: {
-      searchPlaceholder: 'Buscar una película...',
+      searchPlaceholder: 'Buscar por título, género, elenco, director...',
       search: 'Buscar',
       clear: '✕ Limpiar',
       trendingNow: 'Tendencia ahora',
@@ -184,7 +184,7 @@ const translations = {
       getStarted: 'Get started →',
     },
     home: {
-      searchPlaceholder: 'Search for a movie...',
+      searchPlaceholder: 'Search by title, genre, cast, director...',
       search: 'Search',
       clear: '✕ Clear',
       trendingNow: 'Trending Now',

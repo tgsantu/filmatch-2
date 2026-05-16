@@ -76,7 +76,11 @@ router.get('/search', async (req, res) => {
       console.log(`[search] person search failed: ${personRes.reason?.message}`);
     }
 
-    res.json([...movieResults, ...personMovies]);
+    const combined = [...movieResults, ...personMovies]
+      .sort((a, b) => (b._popularity || 0) - (a._popularity || 0))
+      .map(({ _popularity, ...m }) => m);
+
+    res.json(combined);
   } catch (err) {
     res.status(502).json({ error: 'Failed to fetch from TMDB', detail: err.message });
   }
@@ -111,6 +115,7 @@ function formatMovie(m, map = {}) {
     release_year: m.release_date ? parseInt(m.release_date.slice(0, 4)) : null,
     genres,
     overview: m.overview || '',
+    _popularity: m.popularity || 0,
   };
 }
 

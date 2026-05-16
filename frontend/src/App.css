@@ -99,7 +99,15 @@
   color: var(--text-muted);
   font-size: 0.9rem;
   margin-top: -1rem;
+  margin-bottom: 0.5rem;
+}
+
+.section-process {
+  color: var(--text-muted);
+  font-size: 0.78rem;
   margin-bottom: 1.5rem;
+  opacity: 0.7;
+  line-height: 1.5;
 }
 
 .error-msg {

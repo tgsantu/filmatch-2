@@ -49,6 +49,7 @@ export default function Recommendations({ library, onAdd, country }) {
     <div>
       <h1 className="section-title">{t.recommendations.title}</h1>
       <p className="section-subtitle">{t.recommendations.subtitle}</p>
+      <p className="section-process">{t.recommendations.processDesc}</p>
 
       {!generated && !loading && (
         <div className="rec-prompt">

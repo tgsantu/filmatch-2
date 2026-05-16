@@ -96,6 +96,7 @@ const translations = {
     recommendations: {
       title: 'Para Vos',
       subtitle: 'Recomendaciones de IA basadas en tus películas vistas',
+      processDesc: 'Cada vez se eligen 30 películas al azar de tu lista — con director, reparto, géneros y sinopsis — para que cada actualización traiga picks distintos.',
       generate: 'Generar recomendaciones',
       refresh: 'Actualizar',
       generating: 'Pidiendo a la IA tus mejores opciones...',
@@ -240,6 +241,7 @@ const translations = {
     recommendations: {
       title: 'For You',
       subtitle: 'AI-powered recommendations based on your "Seen" list',
+      processDesc: 'Every time, 30 movies are picked at random from your list — with director, cast, genres and synopsis — so each refresh brings a different set of picks.',
       generate: 'Generate Recommendations',
       refresh: 'Refresh',
       generating: 'Asking AI for your perfect picks...',

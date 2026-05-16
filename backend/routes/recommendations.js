@@ -20,10 +20,25 @@ router.post('/', async (req, res) => {
     ? 'Write the "reason" field in Spanish.'
     : 'Write the "reason" field in English.';
 
-  const movieList = movies.map(m => {
+  // Most recent 30: full detail (title + year + genres + overview)
+  // Older movies: title + genres only — keeps token count bounded while preserving taste signal
+  const detailed = movies.slice(0, 30);
+  const compact = movies.slice(30);
+
+  const detailedList = detailed.map(m => {
     const genres = Array.isArray(m.genres) ? m.genres : [];
-    return `"${m.title}" (${m.release_year || 'N/A'}) - Genres: ${genres.join(', ') || 'Unknown'}`;
+    const overview = m.overview ? ` — "${m.overview}"` : '';
+    return `"${m.title}" (${m.release_year || 'N/A'}) [${genres.join(', ') || 'Unknown'}]${overview}`;
   }).join('\n');
+
+  const compactList = compact.length > 0
+    ? '\n\nAdditional watched movies (title + genre only):\n' + compact.map(m => {
+        const genres = Array.isArray(m.genres) ? m.genres : [];
+        return `"${m.title}" [${genres.join(', ') || 'Unknown'}]`;
+      }).join('\n')
+    : '';
+
+  const movieList = detailedList + compactList;
 
   const excludeList = Array.isArray(library) && library.length > 0
     ? `\n\nDo NOT recommend any of these movies (already in the user's list):\n${library.map(m => `"${m.title}"`).join(', ')}`

@@ -121,7 +121,6 @@ router.post('/', async (req, res) => {
   const angles = [
     'Focus on hidden gems and underrated films — avoid the most obvious mainstream picks.',
     'Focus on films from the last 5 years — recent releases the user probably hasn\'t discovered yet.',
-    'Focus on international films (non-English) — world cinema that matches their taste.',
     'Focus on cult classics and films with a devoted following.',
     'Focus on films from the 1970s, 1980s or 1990s — older gems they might have missed.',
     'Focus on critically acclaimed films that flew under the radar commercially.',
